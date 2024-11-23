@@ -1,0 +1,2827 @@
+Code from A Bayesian Introduction to Fish Population Analysis, by Joseph E. Hightower
+
+Larger code blocks pasted here:
+
+Ch 2:
+
+setwd("Q:/My Drive/FishAnalysis") # Edit to show your working directory
+
+# Two-sample population estimate
+n1 <- 26 # Number caught and marked in first sample
+n2 <- 14 # Number caught and examined for marks in second sample
+m2 <- 7 # Number of marked fish in second sample
+N_hat <- n1*n2/m2 # Store estimate as variable N_hat
+N_hat # Prints N_hat in Console window
+
+Ch 3:
+
+N.obs <- 30
+p <- 0.4
+y <- rbinom(n=N.obs, prob=p, size=1)
+Counts <- table(y)  # Summary table of 0 vs 1
+barplot(Counts)
+
+rm(list=ls()) # Clear Environment
+
+N.obs <- 1000
+p <- 0.4
+y <- rbinom(n=N.obs, prob=p, size=1)
+SumOnes <- sum(y)
+SumOnes
+SumOnes/N.obs # Proportion of trials that are successful
+Counts <- table(y)
+barplot(Counts)
+
+rm(list=ls()) # Clear Environment
+
+Clubs <-c(0, 0, 3, 3, 1, 1)  # Drawing five cards, with replacement
+N.trials <- length(Clubs) # Function for getting number of trials
+Counts <- table(Clubs)
+barplot(Counts)
+barplot(Counts, xlab="Number of clubs")
+
+rm(list=ls()) # Clear Environment
+
+N.trials <- 30
+p <- 0.25 # Probability of drawing a club
+Trial.size <- 5
+Clubs <- rbinom(n=N.trials, prob=p, size=Trial.size)
+Clubs
+Counts <- table(Clubs)
+barplot(Counts)
+
+rm(list=ls()) # Clear Environment
+
+N.trials <- 10000
+p <- 0.25 # Probability of drawing a club
+Trial.size <- 5
+Clubs <- rbinom(n=N.trials, prob=p, size=Trial.size)
+#Clubs
+Counts <- table(Clubs)
+barplot(Counts)
+Counts/N.trials # Vector division - probabilities of 0-5 Clubs
+
+rm(list=ls()) # Clear Environment
+
+x <-c(2,3,3,0,2,0)  # Generated using die, equal cell probabilities
+SampleSize <- sum(x)
+barplot(x)
+
+x.labels <- seq(from=1, to=6, by=1)  # x axis labels for plotting
+barplot(x, names.arg=x.labels, xlab="Die side", ylab="Number of rolls")
+
+rm(list=ls()) # Clear Environment
+
+SampleSize <- 30  # e.g., sample of 30 fish assigned by age
+TrueP <- c(0.1, 0.3, 0.4, 0.1, 0.05, 0.05) # probability of being ages 1-6
+Reps <- 1 # How many replicate multinomial trials to carry out
+
+# Simulate a single trial using rmultinom function
+rmultinom(n=Reps, prob=TrueP, size=SampleSize) # Prints matrix to Console
+x <- rmultinom(n=Reps, prob=TrueP, size=SampleSize)
+# x contains matrix of counts (one column per Rep)
+x.vec <- as.vector(t(x)) # Transpose matrix then convert to vector
+
+age.vec <- seq(1,6, by=1)
+barplot(x.vec, names.arg=age.vec, xlab="Age", ylab="Number of fish")
+
+rm(list=ls()) # Clear Environment
+
+N <- 30
+lambda <- 4
+Count <- rpois(n=N, lambda=lambda)
+Freq <- table(Count)  # Distribution of simulated counts
+barplot(Freq, main="", xlab="Count", ylab="Frequency")
+
+mean(Count)
+var(Count)
+
+rm(list=ls()) # Clear Environment
+
+N <- 30
+lambda <- 4
+Count <- rpois(n=N, lambda=lambda) # Counts drawn from Poisson distribution
+Freq <- table(factor(Count, levels = 0:max(Count)))
+barplot(Freq, main="", xlab="Count", ylab="Frequency")
+
+mean(Count)
+var(Count)
+
+rm(list=ls()) # Clear Environment
+
+N <- 30
+mu <- 4
+k=1
+variance <- mu+(mu^2)/k
+Count <- rnbinom(n=N, mu=mu, size=k)
+Freq <- table(factor(Count, levels = 0:max(Count)))
+barplot(Freq, main="", xlab="Count", ylab="Frequency")
+
+mean(Count)
+var(Count)
+
+rm(list=ls()) # Clear Environment
+
+Reps <- 30 # Replicate draws from a uniform distribution
+p <- runif(n=Reps)# Default range of 0-1. Can specify using min, max
+hist(p, breaks=5, main="")
+
+rm(list=ls()) # Clear Environment
+
+Reps <- 200 # Replicate draws from a beta distribution
+alpha <- 1
+beta <- 1
+x <- rbeta(n=Reps, shape1=alpha, shape2=beta)
+hist(x, main="", xlab="Probability")
+
+rm(list=ls()) # Clear Environment
+
+Reps <- 30 # Replicate draws from a normal distribution
+Len <- rnorm(n=Reps, mean=30, sd=2)
+hist(Len, main="")
+
+rm(list=ls()) # Clear Environment
+
+Reps <- 200
+ln.m <- 0 # Ln-scale mean
+ln.v <- 0.5 # Ln-scale variance
+y <- rlnorm(n=Reps, mean=ln.m, sd=sqrt(ln.v))
+
+hist(y, main="Lognormal distribution")
+Exp.mean <- exp(ln.m+(ln.v/2)) # Calculate arithmetic scale expected mean
+abline(v=Exp.mean, col="red")
+Exp.var <- (exp(2*ln.m+ln.v))*(exp(ln.v)-1) # Arithmetic scale expected variance
+mean(y)
+var(y)
+
+rm(list=ls()) # Clear Environment
+
+Reps <- 200 # Replicate draws from a gamma distribution
+alpha <- 3 # Shape parameter, > 0
+beta <- 3 # Scale parameter, > 0
+x <- rgamma(n=Reps, shape=alpha, scale=beta)
+hist(x, main="")
+Exp.mean <- alpha*beta
+Exp.var <- alpha*beta^2
+mean(x)
+var(x)
+
+Ch 4:
+
+rm(list=ls()) # Clear Environment
+
+# Two-sample population estimate
+N.true <- 400  # Arbitrary assumed population size
+p.true <- 0.2 # Capture probability (fraction of population sampled)
+n1 <- N.true * p.true # Number caught and marked in first sample
+n2 <- N.true * p.true # Number caught and examined for marks in second sample
+m2 <- n2 * p.true # Number of marked fish in second sample
+N.hat <- n1*n2/m2 # Store estimate as variable N_hat
+
+# Extend model to allow for stochasticity
+Reps <- 1000
+m2.vec <- rbinom(n=Reps, prob=n1/N.true, size=n2)
+N.hat <- n1 * n2 / m2.vec
+
+hist(m2.vec, xlab="Number of recaptures", main="")
+hist(N.hat, xlab="Population estimate", main="")
+
+mean(N.hat)
+quantile(N.hat, probs=c(0.025, 0.5, 0.975), na.rm=TRUE)
+# quantile function provides empirical confidence bounds and median
+
+rm(list=ls()) # Clear Environment
+
+# Arbitrary 'observed' values for analysis
+N.true <- 400  # Population size
+p.true <- 0.2 # Capture probability (fraction of population sampled)
+n1 <- N.true * p.true # Number caught and marked in first sample
+n2 <- N.true * p.true # Number caught and examined for marks in second sample
+m2 <- n2 * p.true # Number of marked fish in second sample
+
+# Load necessary library packages
+library(rjags)   # Package for fitting JAGS models from within R
+library(R2jags)  # Package for fitting JAGS models. Requires rjags
+
+# JAGS code
+sink("TwoSampleCR.txt")
+cat("
+    model {
+
+  # Prior
+    N.hat ~ dlnorm(0, 1E-6) # uninformative prior (N.hat>0)
+    MarkedFraction <- n1/N.hat
+
+  # Likelihood
+    # Binomial distribution for observed recaptures
+    m2 ~ dbin(MarkedFraction, n2)
+    }
+
+    ",fill = TRUE)
+sink()
+
+# Bundle data
+jags.data <- list("n1", "n2", "m2")
+
+# Initial values.
+jags.inits <- function(){ list(N.hat= rlnorm(n=1, meanlog=10, sdlog=1))}
+
+model.file <- 'TwoSampleCR.txt'
+
+# Parameters monitored
+jags.params <- c("N.hat", "MarkedFraction")
+
+# Call JAGS from R
+jagsfit <- jags(data=jags.data, inits=jags.inits, jags.params,
+                n.chains = 3, n.thin = 1, n.iter = 2000, n.burnin = 1000,
+                model.file)
+print(jagsfit, digits=3)
+plot(jagsfit)
+
+hist(jagsfit$BUGSoutput$sims.list$N.hat, main="", xlab="Population estimates")
+
+rm(list=ls()) # Clear Environment
+
+# Load necessary library packages
+library(rjags)   # Package for fitting JAGS models from within R
+library(R2jags)  # Package for fitting JAGS models. Requires rjags
+
+# Arbitrary 'observed' values for analysis
+N.true <- 400  # Population size
+p.true <- 0.2 # Capture probability (fraction of population sampled)
+n1 <- N.true * p.true # Number caught and marked in first sample
+n2 <- N.true * p.true # Number caught and examined for marks in second sample
+m2 <- n2 * p.true # Number of marked fish in second sample
+
+# JAGS code
+sink("TwoSampleCR.txt")
+cat("
+    model {
+
+    # Priors
+    MarkedFraction ~ dunif(0, 1)
+
+    # Calculated value
+    N.hat <- n1 /MarkedFraction
+
+    # Likelihood
+    # Binomial distribution for observed recaptures
+    m2 ~ dbin(MarkedFraction, n2)
+    }
+
+    ",fill = TRUE)
+sink()
+
+# Bundle data
+jags.data <- list("n1", "n2", "m2")
+
+# Initial values.
+jags.inits <- function(){ list(MarkedFraction=runif(1, min=0, max=1))}
+
+model.file <- 'TwoSampleCR.txt'
+
+# Parameters monitored
+jags.params <- c("N.hat", "MarkedFraction")
+
+# Call JAGS from R
+jagsfit <- jags(data=jags.data, inits=jags.inits, jags.params,
+                n.chains = 3, n.thin = 1, n.iter = 2000, n.burnin = 1000,
+                model.file)
+print(jagsfit, digits=3)
+plot(jagsfit)
+
+rm(list=ls()) # Clear Environment
+
+#1
+x <- 2
+lg(x) # Incorrect function name
+
+#2
+y <- 4
+z <- x+y # Typo (should have been x*y)
+
+#3
+RandLength <- rnorm(1, 10, 2) # Correct but poorly documented
+RandLength <- rnorm(10,2) # Sample size omitted
+RandLength <- rnorm(1,10) # sd omitted so default used (incorrectly)
+RandLength <- rnorm(n=1, mean=10, sd=2) # Correct and fully documented
+
+#4
+x2 <- rnorm(n=1000, mean=10, sd=5)
+x3 <- rnorm(n=1000, mean=20, sd=10)
+x4 <- x2+x3
+mean(x4)
+var(x4)
+
+rm(list=ls()) # Clear Environment
+
+# Two-sample population estimate
+N.true <- 400  # Arbitrary assumed population size
+p.true <-- 0.2 # Capture probability (fraction of population sampled)
+n1 <- N.true X p.true # Number caught and marked in first sample
+n2 <- N.true * p.true # Number caught and examined for marks in second sample
+
+Reps <- 1000
+m2.vec <- rbinom(n=Rep, prob=n1/N.true, size=n2)
+N.hat <- n1 * n2 / m2.vec
+hist(N.hat, xlab="Population estimate", main="")
+mean(N.hat)
+quantile(N.hat, probs=c(0.5), na.rm=TRUE))  # Sample median
+
+rm(list=ls()) # Clear Environment
+
+# Arbitrary 'observed' values for analysis
+N.tagged <- 100
+Exp.rate <- 0.4
+Tags.returned <- rbinom(n=1, prob=Exp.rate, size=N.tagged)
+
+# Load necessary library packages
+library(rjags)   # Package for fitting JAGS models from within R
+library(R2jags)  # Package for fitting JAGS models. Requires rjags
+
+# JAGS code
+sink("ExpRate.txt")
+cat("
+    model {
+
+    # Priors
+    Exp.rate.est ~ dunif(0,1)
+
+    # Likelihood
+    Tags.returned ~ dbin(Exp.rate.est, N.tagged)
+}
+    ",fill = TRUE)
+sink()
+
+# Bundle data
+jags.data <- list("N.tagged", "Tags.returned")
+
+# Initial values.
+jags.inits <- function(){ list(Exp.rate.est=runif(n=1, min=0, max=1))}
+
+model.file <- 'ExpRate.txt'
+
+# Parameters monitored
+jags.params <- c("Exp.rate.est")
+
+# Call JAGS from R
+jagsfit <- jags(data=jags.data, inits=jags.inits, jags.params,
+                n.chains = 3, n.thin = 1, n.iter = 2000, n.burnin = 1000,
+                model.file)
+print(jagsfit, digits=3)
+plot(jagsfit)
+
+par(mfrow=c(3,1)) # Multi-frame plot, 3 rows, 1 col
+matplot(jagsfit$BUGSoutput$sims.array[,,1], type = "l", ylab="Marked fraction")
+matplot(jagsfit$BUGSoutput$sims.array[,,2], type = "l", ylab="N hat")
+matplot(jagsfit$BUGSoutput$sims.array[,,3], type = "l", ylab="Deviance")
+
+jagsfit.mcmc <- as.mcmc(jagsfit) # Creates an MCMC object for plotting
+plot(jagsfit.mcmc) # Trace and density plots
+
+rm(list=ls()) # Clear Environment
+
+# Arbitrary 'observed' values for analysis
+N.true <- 400  # Population size
+p.true <- 0.2 # Capture probability (fraction of population sampled)
+n1 <- N.true * p.true # Number caught and marked in first sample
+n2 <- N.true * p.true # Number caught and examined for marks in second sample
+m2 <- n2 * p.true # Number of marked fish in second sample
+
+# Calculate likelihood for specific value of p
+p <- 0.2
+choose(n2,m2) * p^m2 * (1-p)^(n2-m2) # Likelihood for single value of p
+
+dbinom(x=m2, size=n2, prob=p) # x successes, built-in function to obtain same result
+
+# Create vector of possible p values, determine likelihood for each
+p <- seq(from=0.02, to=1, by=0.02)
+l.vec <- choose(n2,m2) * p^m2 * (1-p)^(n2-m2)
+par(mfrow=c(1,1)) # Reset plot frame
+plot(p, l.vec, ylab="Likelihood", col="red")
+
+# Examine change in likelihood at higher number of recaptures
+new.m2 <- 18
+new.l.vec <- choose(n2,new.m2) * p^new.m2 * (1-p)^(n2-new.m2)
+points(p, new.l.vec, col="blue")
+
+rm(list=ls()) # Clear Environment
+
+# Arbitrary 'observed' values for analysis
+N.true <- 400  # Population size
+p.true <- 0.2 # Capture probability (fraction of population sampled)
+n1 <- N.true * p.true # Number caught and marked in first sample
+n2 <- N.true * p.true # Number caught and examined for marks in second sample
+m2 <- n2 * p.true # Number of marked fish in second sample
+
+# Create vector of possible p values, determine likelihood for each
+p <- seq(from=0.02, to=1, by=0.02)
+l.vec <- choose(n2,m2) * p^m2 * (1-p)^(n2-m2)
+plot(p, l.vec, ylab="Likelihood", col="red")
+
+log_l.vec <- log(l.vec) # Log-likelihood
+plot(p, log_l.vec, ylab="log-Likelihood", col="red")
+dev.vec <- -2 * log_l.vec # Deviance (-2 * ln_L)
+plot(p, dev.vec, ylab="Deviance", col="red")
+
+# Fit model to catch data from Poisson distribution
+
+rm(list=ls()) # Clear Environment
+
+N <- 30
+mu <- 7
+Catch <- rpois(n=N, lambda=mu) # Catches drawn from Poisson distribution
+Freq <- table(Catch)  # Distribution of simulated catches
+barplot(Freq, main="", xlab="Catch", ylab="Frequency")
+
+# Load necessary library
+library(rjags)
+library(R2jags)
+
+sink("PoissonFit.txt")
+cat("
+model {
+
+# Prior
+ lambda.est ~ dunif(0, 100)
+
+# Likelihood
+    for(i in 1:N) {
+      Catch[i] ~ dpois(lambda.est)
+      } #y
+}
+    ",fill=TRUE)
+sink()
+
+# Bundle data
+jags.data <- list("N", "Catch")
+
+# Initial values
+jags.inits <- function(){ list(lambda.est=runif(n=1, min=0, max=100))}
+
+model.file <- 'PoissonFit.txt'
+
+# Parameters monitored
+jags.params <- c("lambda.est")
+
+# Call JAGS from R
+jagsfit <- jags(data=jags.data, jags.params, inits=jags.inits,
+                n.chains = 3, n.thin=1, n.iter = 10000,
+                model.file)
+print(jagsfit)
+plot(jagsfit)
+
+# Fit model to catch data from Poisson distribution
+# Includes code for posterior predictive check
+
+rm(list=ls()) # Clear Environment
+
+N <- 30
+mu <- 7
+Catch <- rpois(n=N, lambda=mu) # Counts drawn from Poisson distribution
+Freq <- table(Catch)  # Distribution of simulated catches
+barplot(Freq, main="", xlab="Catch", ylab="Frequency")
+
+# Load necessary library
+library(rjags)
+library(R2jags)
+
+sink("PPC_Example.txt")
+cat("
+model {
+
+# Prior
+ lambda.est ~ dunif(0, 100)
+
+# Likelihood
+    for(i in 1:N) {
+      Catch[i] ~ dpois(lambda.est)
+      Catch.new[i] ~ dpois(lambda.est) # Replicate new data for PPC
+      # Chi-square discrepancy values for observed and replicate data
+      chi.obs[i] <- pow(Catch[i]-lambda.est,2)/lambda.est
+      chi.new[i] <- pow(Catch.new[i]-lambda.est,2)/lambda.est
+      } #y
+  Total.obs <- sum(chi.obs[])
+  Total.new <- sum(chi.new[])
+  Bayesian.p <- step(Total.new - Total.obs)
+}
+    ",fill=TRUE)
+sink()
+
+# Bundle data
+jags.data <- list("N", "Catch")
+
+# Initial values
+jags.inits <- function(){ list(lambda.est=runif(n=1, min=0, max=100))}
+
+model.file <- 'PPC_Example.txt'
+
+# Parameters monitored
+jags.params <- c("lambda.est", "Bayesian.p")
+
+# Call JAGS from R
+jagsfit <- jags(data=jags.data, jags.params, inits=jags.inits,
+                n.chains = 3, n.thin=1, n.iter = 10000,
+                model.file)
+print(jagsfit)
+plot(jagsfit)
+
+# Fit model to negative binomial data
+# Includes code for posterior predictive check
+
+rm(list=ls()) # Clear Environment
+
+N <- 30
+mu <- 7
+k=1
+variance <- mu+(mu^2)/k
+Catch <- rnbinom(n=N, mu=mu, size=k) # Catches drawn from negative binomial
+Freq <- table(Catch)  # Distribution of simulated counts
+barplot(Freq, main="", xlab="Count", ylab="Frequency")
+
+# DIC comparison for model selection, using "observed" data
+# from a negative binomial distribution
+
+rm(list=ls()) # Clear Environment
+
+N <- 30
+mu <- 7
+k=1
+variance <- mu+(mu^2)/k
+Count <- rnbinom(n=N, mu=mu, size=k) # Counts drawn from negative binomial
+Freq <- table(Count)  # Distribution of simulated counts
+barplot(Freq, main="", xlab="Count", ylab="Frequency")
+
+# Load necessary library
+library(rjags)
+library(R2jags)
+
+sink("PoissonFit.txt")
+cat("
+model {
+
+# Prior
+ lambda.est ~ dunif(0, 100)
+
+# Likelihood
+    for(i in 1:N) {
+      Count[i] ~ dpois(lambda.est)
+      } #y
+}
+    ",fill=TRUE)
+sink()
+
+# Bundle data
+jags.data <- list("N", "Count")
+
+# Initial values
+jags.inits <- function(){ list(lambda.est=runif(n=1, min=0, max=100))}
+
+model.file <- 'PoissonFit.txt'
+
+# Parameters monitored
+jags.params <- c("lambda.est")
+
+# Call JAGS from R
+jagsfit <- jags(data=jags.data, jags.params, inits=jags.inits,
+                n.chains = 3, n.thin=1, n.iter = 10000,
+                model.file)
+print(jagsfit)
+#plot(jagsfit)
+
+Poisson.DIC <- jagsfit$BUGSoutput$DIC
+
+sink("NBFit.txt")
+cat("
+model {
+
+# Prior
+ p.est ~ dunif(0, 1)  # JAGS uses p (probability of success) for negative binomial
+ k.est ~ dunif(0, 1000)
+ mu.est <- k.est*(1-p.est)/p.est
+ 
+# Likelihood
+    for(i in 1:N) {
+      Count[i] ~ dnbinom(p.est, k.est)
+      } #y
+}
+    ",fill=TRUE)
+sink()
+
+# Bundle data
+jags.data <- list("N", "Count")
+
+# Initial values
+jags.inits <- function(){ list(p.est=runif(n=1, min=1E-6, max=1),
+                               k.est=runif(n=1, min=0, max=1000))}
+
+model.file <- 'NBFit.txt'
+
+# Parameters monitored
+jags.params <- c("mu.est", "k.est")
+
+# Call JAGS from R
+jagsfit <- jags(data=jags.data, jags.params, inits=jags.inits,
+                n.chains = 3, n.thin=1, n.iter = 10000,
+                model.file)
+print(jagsfit)
+#plot(jagsfit)
+NB.DIC <- jagsfit$BUGSoutput$DIC
+Poisson.DIC - NB.DIC
+
+rm(list=ls()) # Clear Environment
+
+# Load necessary library packages
+library(rjags)   # Package for fitting JAGS models from within R
+library(R2jags)  # Package for fitting JAGS models. Requires rjags
+
+# Arbitrary 'observed' values for analysis
+Reps <- 20
+AveC <- 3
+Count <- rpois(n=Reps lambda=AveC)
+
+# JAGS code
+sink("PoissonSim.txt")
+cat("
+    model {
+
+    # Priors
+    AveC.est ~ dunif(0, MaxCount)
+   
+    # Likelihood
+    for (i in 1:Rep){
+    Count[i] ~ dpois(AveCest)
+    } #i
+}
+    ",fill = TRUE)
+sink()
+
+# Bundle data
+jags.data <- list("Count")
+
+# Initial values.
+jags.inits <- function(){ list(AveC.est=runif(n=1, min=0, max=100))}
+
+model.file <- 'PoisonSim.txt'
+
+# Parameters monitored
+jags.params <- c("AveC.est")
+
+# Call JAGS from R
+jagsfit <- jags(data=jags.data, inits=jags.inits, jags.params,
+                n.chains = 3, n.thin = 1, n.iter = 2000, n.burnin = 1000,
+                model.file)
+print(jagsfit, digits=3)
+plot(jagsfit)
+
+Ch 5:
+
+rm(list=ls()) # Clear Environment
+
+# Generate simulated removals, assuming constant catchability
+N.removals <- 5 # Number of removals
+N.true <- 100
+CapProb <- 0.4
+N.remaining <- N.true # Initialize N.remaining, before removals begin
+Catch <- numeric() # Creates empty vector for storing catch data
+for (j in 1:N.removals){
+  Catch[j] <- rbinom(1, N.remaining, CapProb)
+  N.remaining <- N.remaining - Catch[j]
+  } #j
+
+# Load necessary library
+library(rjags)   # Package for fitting JAGS models from within R
+library(R2jags)  # Package for fitting JAGS models. Requires rjags
+
+# JAGS code for fitting model
+sink("RemovalModel.txt")
+  cat("
+model{
+
+# Priors
+ CapProb.est ~ dunif(0,1)
+ N.est ~ dunif(TotalCatch, 2000)
+
+ N.remaining[1] <- trunc(N.est)
+ for(j in 1:N.removals){
+      Catch[j]~dbin (CapProb.est, N.remaining[j]) # jth removal
+      N.remaining[j+1] <- N.remaining[j]-Catch[j] # Remaining population after removal
+  } #j
+
+}
+      ",fill=TRUE)
+  sink()
+
+     # Bundle data
+  jags.data <- list("Catch", "N.removals", "TotalCatch")
+
+  TotalCatch <- sum(Catch[])
+
+  # Initial values
+  jags.inits <- function(){ list(CapProb.est=runif(1, min=0, max=1),
+                                  N.est=runif(n=1, min=TotalCatch, max=2000))}
+
+  model.file <- 'RemovalModel.txt'
+
+  # Parameters monitored
+  jags.params <- c("N.est", "CapProb.est")
+
+   # Call JAGS from R
+  jagsfit <- jags(data=jags.data, jags.params, inits=jags.inits,
+                  n.chains = 3, n.thin = 1, n.iter = 40000,
+                  model.file)
+  print(jagsfit)
+  plot(jagsfit)
+
+rm(list=ls()) # Clear Environment
+
+# Simulate experiment
+N.true <- 400  # Population size
+p.true <- 0.2 # Capture probability (fraction of population sampled)
+n1 <- N.true * p.true # Number caught and marked in first sample
+n2 <- N.true * p.true # Number caught and examined for marks in second sample
+m2 <- rbinom(n=1, size=n2, prob=p.true) # Marked fish in second sample
+
+# Load necessary library
+library(rjags)   # Package for fitting JAGS models from within R
+library(R2jags)  # Package for fitting JAGS models. Requires rjags
+
+# JAGS code
+sink("TwoSampleCR.txt")
+cat("
+    model {
+
+    # Priors
+    MarkedFraction ~ dunif(0, 1)
+
+    # Calculated value
+    N.hat <- n1 /MarkedFraction
+
+    # Likelihood
+    # Binomial distribution for observed recaptures
+    m2 ~ dbin(MarkedFraction, n2)
+    }
+
+    ",fill = TRUE)
+sink()
+
+# Bundle data
+jags.data <- list("n1", "n2", "m2")
+
+# Initial values.
+jags.inits <- function(){ list(MarkedFraction=runif(1, min=0, max=1))}
+
+model.file <- 'TwoSampleCR.txt'
+
+# Parameters monitored
+jags.params <- c("N.hat", "MarkedFraction")
+
+# Call JAGS from R
+jagsfit <- jags(data=jags.data, inits=jags.inits, jags.params,
+                n.chains = 3, n.thin = 1, n.iter = 2000, n.burnin = 1000,
+                model.file)
+print(jagsfit, digits=3)
+plot(jagsfit)
+
+par(mfrow=c(3,1))
+hist(jagsfit$BUGSoutput$sims.array[,,1], main="", xlab="Marked fraction")
+hist(jagsfit$BUGSoutput$sims.array[,,2], main="", xlab="Population estimate")
+plot(jagsfit$BUGSoutput$sims.array[,,1], jagsfit$BUGSoutput$sims.array[,,2],
+     xlab="Marked fraction", ylab="Population estimate")
+
+rm(list=ls()) # Clear Environment
+
+# Simulate experiment
+N.true <- 20  # Number of individuals at site
+p.true <- 0.5 # Detection probability (fraction of individuals detected)
+Replicates <- 1000
+Counts <- rbinom(n=Replicates, size=N.true, prob=p.true) # Vector of replicate counts
+
+par(mfrow=c(1,1)) # Ensure plot window is reset to default setting
+hist(Counts, main="")
+table(Counts)
+
+N.true <- 20  # Number of individuals at site
+p.true <- 0.5 # Detection probability (fraction of individuals detected)
+Replicates <- 10000
+Counts <- rbinom(n=Replicates, size=N.true, prob=p.true) # Vector of replicate counts
+table(Counts)
+
+par(mfrow=c(2,1)) # Two rows, one column
+hist(Counts, main="N.true=20", xlim=c(0,25))
+
+N.true <- 40  # Number of individuals at site
+p.true <- 0.25 # Detection probability (fraction of individuals detected)
+Counts <- rbinom(n=Replicates, size=N.true, prob=p.true) # Vector of replicate counts
+hist(Counts, main="N.true=40", xlim=c(0,25))
+table(Counts)
+
+rm(list=ls()) # Clear Environment
+
+Sites <- 30
+Replicates <- 3
+lam.true <- 20 # Mean number per site
+p.true <- 0.5 # Detection probability
+
+Counts <- matrix(NA, nrow=Sites, ncol=Replicates)
+Site.N <- rpois(n = Sites, lambda = lam.true) # True abundance at each site
+for (i in 1:Sites){
+  Counts[i,] <- rbinom(n = Replicates, size = Site.N[i], prob = p.true)
+  } #i
+head(Site.N)
+head(Counts)
+
+# Load necessary library
+library(rjags)
+library(R2jags)
+
+# Specify model in BUGS language
+sink("N-mix.txt")
+cat("
+model {
+
+# Priors
+  lam.est ~ dunif(0, 100)  # uninformative prior for mean abundance at each site
+  p.est ~ dunif(0, 1)
+
+# Likelihood
+# Biological model for true abundance
+for (i in 1:Sites) {
+   N.est[i] ~ dpois(lam.est)
+   # Observation model for replicated counts
+   for (j in 1:Replicates) {
+      Counts[i,j] ~ dbin(p.est, N.est[i])
+      } # j
+   } # i
+totalN <- sum(N.est[])     # Calculated variable: total pop. size across all sites
+}
+",fill = TRUE)
+sink()
+
+# Bundle data
+jags.data <- list("Counts", "Sites", "Replicates")
+
+# Initial values
+Nst <- apply(Counts, 1, max) + 1    # Kery and Schaub
+jags.inits <- function(){ list(lam.est=runif(n=1, min=0, max=100),
+                               N.est=Nst, p.est=runif(1, min=0, max=1))}
+
+model.file <- 'N-mix.txt'
+
+# Parameters monitored
+jags.params <- c("lam.est", "p.est", "totalN")
+
+# Call JAGS from R
+jagsfit <- jags(data=jags.data, jags.params, inits=jags.inits,
+                n.chains = 3, n.thin=1, n.iter = 100000,
+                model.file)
+print(jagsfit)
+par(mfrow=c(1,1)) # Reset plot panel
+plot(jagsfit)
+
+# Estimated posterior distribution for total population size
+hist(jagsfit$BUGSoutput$sims.list$totalN, xlab="Estimated total pop size", main="")
+abline(v=sum(Site.N), col="red")
+
+Ch 6:
+
+rm(list=ls()) # Clear Environment
+
+# Simulate age composition sampling
+MaxAge <- 10
+S.true <- 0.7 # Annual survival probability
+
+# Simulated age vector at equilibrium (expected values)
+N <- array(data=NA, dim=MaxAge)
+N[1] <- 1000
+for (j in 2:(MaxAge)){
+  N[j] <- N[j-1] * S.true
+} #j
+age.vec <- seq(1,MaxAge, by=1)  # Sequence function: x axis values for plot
+barplot(N, names.arg=age.vec, xlab="Age", ylab="Number")
+
+SampleSize <- 30
+AgeMatrix <- rmultinom(n=1, size=SampleSize, prob=N)
+# Note: prob vector rescaled internally
+AgeSample <- as.vector(t(AgeMatrix)) # Transpose matrix then convert to vector
+barplot(AgeSample, names.arg=age.vec, xlab="Age", ylab="Frequency")
+
+# Load necessary library
+library(rjags)
+library(R2jags)
+
+# JAGS code
+sink("AgeComp.txt")
+cat("
+model{
+    # Priors
+    S.est ~ dunif(0,1)  # Constant survival over sampled age range
+
+    N[1] <- 1000
+    # Generate equilibrium age proportions
+    for (j in 2:MaxAge){
+      N[j] <- N[j-1]*S.est
+    } # j
+    N.sum <- sum(N[]) # Rescale so that proportions sum to 1
+    for (j in 1:MaxAge){
+    p[j] <- N[j]/N.sum
+    } #j
+    # Likelihood
+    AgeSample[] ~ dmulti(p[], SampleSize)
+    # Fit multinomial distribution based on constant survival
+}
+    ",fill=TRUE)
+sink()
+
+# Bundle data
+jags.data <- list("AgeSample", "SampleSize", "MaxAge")
+
+# Initial values
+jags.inits <- function(){ list(S.est=runif(n=1, min=0, max=1))}
+
+model.file <- 'AgeComp.txt'
+
+# Parameters monitored
+jags.params <- c("S.est")
+
+# Call JAGS from R
+jagsfit <- jags(data=jags.data, jags.params, inits=jags.inits,
+                n.chains = 3, n.thin=1, n.iter = 4000, n.burnin=2000,
+                model.file)
+print(jagsfit)
+plot(jagsfit)
+
+# Look at posterior distribution versus true value
+hist(jagsfit$BUGSoutput$sims.list$S.est, 
+     xlab="Estimated survival rate", main="")
+abline(v=S.true, col="red")
+
+# Add code to compare observed and predicted age comp
+N.hat <- array(data=NA, dim=MaxAge)
+N.hat[1] <- 1000
+for (j in 2:(MaxAge)){
+  N.hat[j] <- N.hat[j-1] * jagsfit$BUGSoutput$median$S.est
+} #j
+par(mfrow=c(2,1))
+barplot(AgeSample, names.arg=age.vec, xlab="Age", 
+        ylab="Number", main="Observed")
+barplot(N.hat, names.arg=age.vec, xlab="Age", 
+        ylab="Number", main="Predicted")
+par(mfrow=c(1,1)) # Reset plot window
+
+# Add in selectivity
+k <- 2 # Slope for logistic function
+a_50 <- 4 # Age at 0.5 selectivity
+
+# Age selectivity
+Sel <- array(data=NA, dim=MaxAge)
+for (j in 1:(MaxAge)){
+  Sel[j] <- 1/(1+exp(-k*(j-a_50)))
+} #j
+age.vec <- seq(1,MaxAge, by=1)  # Sequence function: x axis values for plot
+par(mfrow=c(1,1))
+plot(age.vec, Sel, xlab="Age", ylab="Gear selectivity")
+
+rm(list=ls()) # Clear Environment
+
+# Simulate age composition sampling with age-specific selectivity
+MaxAge <- 10
+S.true <- 0.7 # Annual survival probability
+
+# Parameters for selectivity curve
+k <- 2 # Slope for logistic function
+a_50 <- 4 # Age at 0.5 selectivity
+
+# Age selectivity
+Sel <- array(data=NA, dim=MaxAge)
+for (j in 1:(MaxAge)){
+  Sel[j] <- 1/(1+exp(-k*(j-a_50)))
+} #j
+age.vec <- seq(1,MaxAge, by=1)  # Sequence function: x axis values for plot
+par(mfrow=c(1,1))
+plot(age.vec, Sel, xlab="Age", ylab="Gear selectivity")
+
+# Simulated age vector, including gear selectivity
+N <- array(data=NA, dim=MaxAge)
+N[1] <- 1000
+for (j in 2:(MaxAge)){
+  N[j] <- N[j-1] * S.true
+} #j
+N_Sel <- N * Sel
+age.vec <- seq(1,MaxAge, by=1)  # Sequence function: x axis values for plot
+barplot(N_Sel, names.arg=age.vec, xlab="Age", ylab="Number", 
+        main="Expected age distribution")
+
+SampleSize <- 100
+AgeMatrix <- rmultinom(n=1, size=SampleSize, prob=N_Sel)
+  # Note: prob vector rescaled internally
+AgeSample <- as.vector(t(AgeMatrix)) # Transpose matrix then convert to vector
+barplot(AgeSample, names.arg=age.vec, xlab="Age", 
+        ylab="Frequency", main="Sample age distribution")
+# JAGS analysis
+library(rjags)
+library(R2jags)
+
+sink("AgeComp.txt")
+cat("
+model{
+    # Priors
+    S.est ~ dunif(0,1)  # Constant survival over sampled age range
+    a50.est ~ dunif(0, MaxAge)
+    k.est ~ dlnorm(0, 1E-6) # Slope > 0 for increasing selectivity
+
+    N[1] <- 1000
+    # Generate equilibrium age proportions
+    for (j in 2:MaxAge){
+      N[j] <- N[j-1]*S.est
+    } # j
+    for (j in 1:MaxAge){
+    Sel[j] <- 1/(1+exp(-k.est*(j-a50.est)))
+     N.Sel[j] <- N[j] * Sel[j]
+    }
+    N.sum <- sum(N.Sel[]) # Rescale so that proportions sum to 1
+    for (j in 1:MaxAge){
+    p[j] <- N.Sel[j]/N.sum
+    } #j
+    # Likelihood
+    AgeSample[] ~ dmulti(p[], SampleSize)  
+    # Fit multinomial distribution based on constant survival
+}
+    ",fill=TRUE)
+sink()
+
+# Bundle data
+jags.data <- list("AgeSample", "SampleSize", "MaxAge")
+
+# Initial values
+jags.inits <- function(){ list(S.est=runif(n=1, min=0, max=1),
+                               a50.est=runif(n=1, min=0, max=MaxAge),
+                               k.est=rlnorm(n=1, meanlog=0, sdlog=1))}
+                               # Arbitrary low initial values for k.est
+
+model.file <- 'AgeComp.txt'
+
+# Parameters monitored
+jags.params <- c("S.est", "a50.est", "k.est")
+
+# Call JAGS from R
+jagsfit <- jags(data=jags.data, jags.params, inits=jags.inits,
+                n.chains = 3, n.thin=1, n.iter = 20000,
+                model.file)
+print(jagsfit)
+plot(jagsfit)
+
+rm(list=ls()) # Clear Environment
+
+# Simulate age composition sampling with age-specific selectivity
+MaxAge <- 10
+S.true <- 0.7 # Annual survival probability
+
+# Parameters for selectivity curve
+k <- 2 # Slope for logistic function
+a_50 <- 4 # Age at 0.5 selectivity
+
+# Age selectivity
+Sel <- array(data=NA, dim=MaxAge)
+for (j in 1:(MaxAge)){
+  Sel[j] <- 1/(1+exp(-k*(j-a_50)))
+} #j
+age.vec <- seq(1,MaxAge, by=1)  # Sequence function to provide x axis values for plotting
+par(mfrow=c(1,1))
+plot(age.vec, Sel, xlab="Age", ylab="Gear selectivity")
+
+# Simulated age vector, including gear selectivity
+N <- array(data=NA, dim=MaxAge)
+N[1] <- 1000
+for (j in 2:(MaxAge)){
+  N[j] <- N[j-1] * S.true
+} #j
+N_Sel <- N * Sel
+age.vec <- seq(1,MaxAge, by=1)  # Sequence function to provide x axis values for plotting
+barplot(N_Sel, names.arg=age.vec, xlab="Age", ylab="Number", main="Expected age distribution")
+
+SampleSize <- 100
+AgeMatrix <- rmultinom(n=1, size=SampleSize, prob=N_Sel) # prob vector is rescaled internally
+AgeSample <- as.vector(t(AgeMatrix)) # Transpose matrix then convert to vector
+barplot(AgeSample, names.arg=age.vec, xlab="Age", ylab="Frequency", main="Sample age distribution")
+
+# Auxiliary tag-return data
+TagReturns <- 30
+RetMatrix <- rmultinom(n=1, size=TagReturns, prob=Sel) # prob vector is rescaled internally
+RetVector <- as.vector(t(RetMatrix)) # Transpose matrix then convert to vector
+barplot(RetVector, names.arg=age.vec, xlab="Age", ylab="Frequency", main="Tag returns")
+
+# JAGS analysis
+library(rjags)
+library(R2jags)
+
+sink("AgeComp.txt")
+cat("
+model{
+    # Priors
+    S.est ~ dunif(0,1)  # Constant survival over sampled age range
+    a50.est ~ dunif(0, MaxAge)
+    k.est ~ dlnorm(0, 1E-6) # Slope > 0 for increasing selectivity
+
+    N[1] <- 1000
+    # Generate equilibrium age proportions
+    for (j in 2:MaxAge){
+      N[j] <- N[j-1]*S.est
+    } # j
+    for (j in 1:MaxAge){
+    Sel[j] <- 1/(1+exp(-k.est*(j-a50.est)))
+     N.Sel[j] <- N[j] * Sel[j]
+    }
+    N.sum <- sum(N.Sel[]) # Rescale so that proportions sum to 1
+    for (j in 1:MaxAge){
+    p[j] <- N.Sel[j]/N.sum
+    } #j
+    # Likelihood
+    AgeSample[] ~ dmulti(p[], SampleSize)  # Fit multinomial distribution based on constant survival
+
+    # Additional likelihood for tag-return data
+    Sel.sum <- sum(Sel[])
+    for (j in 1:MaxAge){
+    Sel.p[j] <- Sel[j]/Sel.sum
+    } #j
+    RetVector[] ~ dmulti(Sel.p[], TagReturns)    
+}
+    ",fill=TRUE)
+sink()
+
+# Bundle data
+jags.data <- list("AgeSample", "SampleSize", "MaxAge", "TagReturns", "RetVector")
+
+# Initial values
+jags.inits <- function(){ list(S.est=runif(n=1, min=0, max=1),
+                               a50.est=runif(n=1, min=0, max=MaxAge),
+                               k.est=rlnorm(n=1, meanlog=0, sdlog=1))} 
+                            # Arbitrary low initial value for k.est
+
+model.file <- 'AgeComp.txt'
+
+# Parameters monitored
+jags.params <- c("S.est", "a50.est", "k.est")
+
+# Call JAGS from R
+jagsfit <- jags(data=jags.data, jags.params, inits=jags.inits,
+                n.chains = 3, n.thin=1, n.iter = 20000,
+                model.file)
+print(jagsfit)
+plot(jagsfit)
+
+rm(list=ls()) # Clear Environment
+
+# Simulation to create survey catch-at-age matrix
+# Assume ages included in matrix are fully selected
+A <- 4 # Arbitrary number of ages in survey catch matrix
+Y <- 10
+LowS <- 0.2 # Arbitrary lower bound
+HighS <- 0.9 # Arbitrary upper bound
+MeanS <- (LowS+HighS)/2
+AnnualS <- array(data=NA, dim=(Y-1))
+AnnualS <- runif((Y-1), min=LowS, max=HighS)
+
+MeanR <- 400 # Arbitrary mean initial cohort size (relative)
+N <- array(data=NA, dim=c(A, Y))
+N[1,] <- rpois(Y, MeanR) # Starting size of each cohort at first age
+for (a in 2:A){
+  N[a,1] <- rpois(1,MeanS^(a-1)*MeanR) # Starting sizes - ages 2+, year 1
+  for (y in 2:Y){
+    N[a,y] <- rbinom(1, N[a-1, y-1], AnnualS[y-1]) # Fill in older ages
+    } #y
+  } #a
+
+SurveyCapProb <- 0.05 # Capture probability
+SurveyC <- array(data=NA, dim=c(A, Y))
+# Generate survey catches (account for survey catchability)
+for (a in 1:A){
+  for (y in 1:Y){
+    SurveyC[a,y] <- rbinom(1, N[a, y], SurveyCapProb)
+  } #y
+} #a
+
+# Load necessary library packages
+library(rjags)   # Package for fitting JAGS models from within R
+library(R2jags)  # Package for fitting JAGS models. Requires rjags
+
+# JAGS code
+sink("CatchAge.txt")
+cat("
+model {
+    # Priors
+    for (y in 1:Y) {
+      Recruits[y] ~ dlnorm(0, 1E-6) # Non-negative values
+    SurveyC.est[1,y]<-Recruits[y] }
+
+    for (a in 2:A){
+      Initials[a-1] ~ dlnorm(0, 1E-6) 
+      # Non-negative; offset index to run vector from 1 to A-1
+    SurveyC.est[a,1]<-Initials[a-1] }
+
+  meanS <- prod(S.est)^(1/(Y-1))
+  for (y in 1:(Y-1)) {
+    S.est[y] ~ dunif(0,1)
+    } #y
+
+    # Population projection
+    for (a in 2:A) {
+   for (y in 2:Y) {
+     SurveyC.est[a,y] ~ dbin(S.est[y-1], trunc(SurveyC.est[a-1,y-1])) } }
+
+    #Likelihood
+    for (a in 1:A) {
+   for (y in 1:Y) {
+      SurveyC[a,y]~dpois(SurveyC.est[a,y])
+     } } #a #y
+}
+    ",fill=TRUE)
+sink()
+
+# Bundle data
+jags.data <- list("Y", "A", "SurveyC")
+
+# Initial values
+jags.inits <- function(){ list(Recruits=rlnorm(n=Y, meanlog=10, sdlog=1),
+                               Initials=rlnorm(n=(A-1), meanlog=10, sdlog=1))}
+
+model.file <- 'CatchAge.txt'
+
+# Parameters monitored
+jags.params <- c("S.est", "meanS")
+
+# Call JAGS from R
+jagsfit <- jags(data=jags.data, jags.params, inits=jags.inits,
+                n.chains = 3, n.thin=1, n.iter = 10000,
+                model.file)
+print(jagsfit)
+plot(jagsfit)
+
+plot(seq(1:(Y-1)), jagsfit$BUGSoutput$mean$S.est, ylab="Survival", xlab="Year",
+     type="b", pch=19, ylim=c(0,1))
+points(AnnualS, col="blue", type="b")
+
+rm(list=ls()) # Clear Environment
+
+# Modified from Kery and Schaub 2011, Section 7.3
+# Define parameter values
+n.occasions <- 5            # Number of capture occasions
+marked <- 50                # Number marked (all at time 1)
+S.true <- 0.5
+p.true <- 0.8
+
+# Define function to simulate a capture-history (CH) matrix
+simul.cjs <- function(S.true, p.true, marked, n.occasions){
+  Latent <- CH <- matrix(0, ncol = n.occasions, nrow = marked)
+  # Fill the CH matrix
+  for (i in 1:marked){
+    Latent[i,1] <- CH[i,1] <- 1    # Known alive state at release occasion
+    for (t in 2:n.occasions){
+      # Bernoulli trial: does individual survive occasion?
+      Latent[i,t] <- rbinom(1, 1, (Latent[i,(t-1)]*S.true))
+      # Bernoulli trial: is individual recaptured?
+      CH[i,t] <- rbinom(1, 1, (Latent[i,t]*p.true))
+    } #t
+  } #i
+  return(CH)
+}
+
+# Execute function
+CH <- simul.cjs(S.true, p.true, marked, n.occasions)
+
+# Load necessary library
+library(rjags)
+library(R2jags)
+
+# Specify model in JAGS
+sink("CJS_StateSpace.txt")
+cat("
+model {
+
+# Priors and constraints
+S.est ~ dunif(0, 1)
+p.est ~ dunif(0, 1)
+
+# Likelihood
+for (i in 1:marked){
+   z[i,1] <- 1 # Latent state 1 (alive) at time of release (time 1 here)
+   for (t in 2:n.occasions){
+      # State process. If z[t-1]=1, prob=S. If z=0, prob=0
+      z[i,t] ~ dbern(z[i,t-1]*S.est)
+
+      # Observation process. If z[t]=1, prob=p. If z=0, prob=0
+      CH[i,t] ~ dbern(z[i,t]*p.est)
+      } #t
+   } #i
+}
+",fill = TRUE)
+sink()
+
+# Bundle data
+jags.data <- list(CH = CH, marked = marked, n.occasions = n.occasions)
+
+# Initial values for latent state z
+init.z <- function(ch){
+  state <- ch
+  for (i in 1:dim(ch)[1]){
+    n1 <- min(which(ch[i,]==1)) # Column with first detection (col 1 here)
+    n2 <- max(which(ch[i,]==1)) # Column with last detection
+    # Fish are known to be alive between n1 and n2
+    state[i,n1:n2] <- 1
+    state[i,n1] <- NA # Initial value not needed for release period
+  }
+  state[state==0] <- NA
+  return(state)
+}
+
+jags.inits <- function(){list(S.est = runif(1, 0, 1), p.est = runif(1, 0, 1),
+                              z = init.z(CH))}
+
+# Parameters monitored
+jags.params <- c("S.est", "p.est")
+
+model.file <- 'CJS_StateSpace.txt'
+
+jagsfit <- jags(data=jags.data, jags.params, inits=jags.inits,
+                n.chains = 3, n.thin=1, n.iter = 4000, n.burnin=2000,
+                model.file)
+print(jagsfit)
+plot(jagsfit)
+
+rm(list=ls()) # Clear Environment
+
+# Parameter values for three-yr experiment
+Periods <- 3  # Equal number of release and return periods assumed
+NTags <- 1000 # Number released each period
+S.true <- 0.8 # Survival rate
+r.true <- 0.1 # Tag recovery rate (exploitation rate * tag-reporting rate)
+
+# Calculated value(s), array creation
+TagsAtRisk <- array(data=NA, dim=c(Periods, Periods))
+TagFate <- array(data=NA, dim=c(Periods, Periods+1))   
+# Extra column for tags not seen again
+
+for (i in 1:Periods){ 
+# Expected values for tags-at-risk, returned/not-seen-again
+    TagsAtRisk[i,i] <- NTags
+    TagFate[i,i] <-  TagsAtRisk[i,i] * r.true # Returns in release period
+  j <- i+1
+  while(j <= Periods) {
+      TagsAtRisk[i,j] <- TagsAtRisk[i,(j-1)]*S.true
+      TagFate[i,j] <- TagsAtRisk[i,j] * r.true
+      j <- j+1
+     } #while
+   TagFate[i, Periods+1] <- NTags-sum(TagFate[i,i:Periods]) # Not seen again
+  } #i
+
+#Random trial (tags returned by period or not seen again)
+RandRet <- array(data=NA, dim=c(Periods, Periods+1))
+  for (i in 1:Periods) # Create upper diagonal matrix of random outcomes
+  {
+    RandRet[i,i:(Periods+1)] <- t(rmultinom(1, NTags, TagFate[i,i:(Periods+1)]))
+  } #i
+
+# Load necessary library
+library(rjags)
+library(R2jags)
+
+# Specify model in JAGS
+sink("TagReturn.txt")
+cat("
+model {
+  # Priors
+  S.est ~ dunif(0,1) # Time-independent survival rate
+  r.est ~ dunif(0,1) # Time-independent tag-recovery rate
+
+  # Calculated value
+  A.est <- 1-S.est # Rate of mortality
+
+# Cell probabilities
+for (i in 1:Periods) {
+   p.est[i,i] <- r.est
+   for (j in (i+1):Periods) {
+      p.est[i,j] <- p.est[i,(j-1)] * S.est
+      } #j
+    p.est[i,Periods+1] <- 1 - sum(p.est[i, i:Periods])
+    # Last column is prob of not being seen again
+    } #i
+
+# Likelihood
+  for (i in 1:Periods) {
+    RandRet[i,i:(Periods+1)] ~ dmulti(p.est[i,i:(Periods+1)], NTags)
+    }#i
+ } # model
+
+",fill=TRUE)
+sink()
+
+     # Bundle data
+  jags.data <- list("RandRet", "Periods", "NTags")
+
+  S.init <- runif(1,min=0,max=1)
+  r.init <- 1-S.init
+
+  # Initial values
+  jags.inits <- function(){list(S.est = S.init, r.est=r.init)}
+
+  model.file <- 'TagReturn.txt'
+
+  # Parameters monitored
+  jags.params <- c("S.est", "r.est", "A.est")
+
+   # Call JAGS from R
+  jagsfit <- jags(data=jags.data, jags.params, inits=jags.inits,
+                  n.chains = 3, n.thin=1, n.iter = 4000, n.burnin=2000,
+                  model.file)
+  print(jagsfit)
+  plot(jagsfit)
+  
+  # Estimated posterior distributions
+hist(jagsfit$BUGSoutput$sims.array[,,2], main="", xlab="Survival")
+abline(v=S.true, col="red")
+hist(jagsfit$BUGSoutput$sims.array[,,4], main="", xlab="Tag recovery rate")
+abline(v=r.true, col="red")
+
+Ch 7:
+
+rm(list=ls()) # Clear Environment
+
+# Tagging study to estimate exploitation rate
+u.true <- 0.4
+n.tagged <- 100
+n.returned <- rbinom(n=1, prob=u.true, size=n.tagged)
+# Load necessary library
+library(rjags)
+library(R2jags)
+
+# JAGS code
+sink("ExpRate.txt")
+cat("
+model{
+    # Priors
+    u.est ~ dunif(0,1)  # Exploitation rate
+
+    # Likelihood
+    n.returned ~ dbin(u.est, n.tagged)
+}
+    ",fill=TRUE)
+sink()
+
+# Bundle data
+jags.data <- list("n.returned", "n.tagged")
+
+# Initial values
+jags.inits <- function(){ list(u.est=runif(n=1, min=0, max=1))}
+
+model.file <- 'ExpRate.txt'
+
+# Parameters monitored
+jags.params <- c("u.est")
+
+# Call JAGS from R
+jagsfit <- jags(data=jags.data, jags.params, inits=jags.inits,
+                n.chains = 3, n.thin=1, n.iter = 4000, n.burnin=2000,
+                model.file)
+print(jagsfit)
+plot(jagsfit)
+
+rm(list=ls()) # Clear Environment
+
+# Tagging study to estimate exploitation rate
+u.true <- 0.4
+n.tagged <- 100
+n.returned <- rbinom(n=1, prob=u.true, size=n.tagged)
+
+# Load necessary library
+library(rjags)
+library(R2jags)
+
+# JAGS code
+sink("ExpRate.txt")
+cat("
+model{
+    # Priors
+    u.est ~ dbeta(1,1)  # Exploitation rate
+
+    # Likelihood
+    n.returned ~ dbin(u.est, n.tagged)
+}
+    ",fill=TRUE)
+sink()
+
+# Bundle data
+jags.data <- list("n.returned", "n.tagged")
+
+# Initial values
+jags.inits <- function(){ list(u.est=rbeta(n=1, shape1=1, shape2=1))}
+
+model.file <- 'ExpRate.txt'
+
+# Parameters monitored
+jags.params <- c("u.est")
+
+# Call JAGS from R
+jagsfit <- jags(data=jags.data, jags.params, inits=jags.inits,
+                n.chains = 3, n.thin=1, n.iter = 4000, n.burnin=2000,
+                model.file)
+print(jagsfit)
+plot(jagsfit)
+
+# Informative prior
+n.pilot <- 20
+n.returned.pilot <- rbinom(n=1, prob=u.true, size=n.pilot)
+
+# Load necessary library
+library(rjags)
+library(R2jags)
+
+# JAGS code
+sink("ExpRate.txt")
+cat("
+model{
+    # Priors
+    u.est ~ dbeta((n.returned.pilot+1), 
+         (n.pilot-n.returned.pilot+1)) # Exploitation rate
+
+    # Likelihood
+    n.returned ~ dbin(u.est, n.tagged)
+}
+    ",fill=TRUE)
+sink()
+
+# Bundle data
+jags.data <- list("n.returned", "n.tagged", "n.pilot", "n.returned.pilot")
+
+# Initial values
+jags.inits <- function(){ list(u.est=rbeta(n=1, shape1=1, shape2=1))}
+
+model.file <- 'ExpRate.txt'
+
+# Parameters monitored
+jags.params <- c("u.est")
+
+# Call JAGS from R
+informative <- jags(data=jags.data, jags.params, inits=jags.inits,
+                n.chains = 3, n.thin=1, n.iter = 4000, n.burnin=2000,
+                model.file)
+print(informative)
+plot(informative)
+
+# Vague prior and posterior
+par(mfrow=c(2,1))
+par(mar=c(2,4,2,1)) # bottom, left, right, top margins
+dens1 <- density(jagsfit$BUGSoutput$sims.list$u.est)
+dens2 <- density(informative$BUGSoutput$sims.list$u.est)
+y.bounds <- range(dens1$y, dens2$y)
+x.bounds <- range(jagsfit$BUGSoutput$sims.list$u.est, 
+              informative$BUGSoutput$sims.list$u.est)
+plot(density(jagsfit$BUGSoutput$sims.list$u.est), xlab="", main="", 
+     xlim=x.bounds, ylim=y.bounds)
+abline(v=u.true, col="red")
+x.vec <- seq(x.bounds[1], x.bounds[2], length.out=101)
+lines(x.vec,
+      dbeta(seq(x.bounds[1], x.bounds[2], length.out=101), shape1=1, shape2=1),
+      lty=2)
+legend(x = "topleft", lty = c(2,1), text.font = 1,  
+       legend=c("Prior", "Posterior")) 
+
+# Informative prior and posterior
+par(mar=c(4,4,1,1))
+plot(dens2,xlab="Estimated exploitation rate", main="", 
+     xlim=x.bounds, ylim=y.bounds)
+abline(v=u.true, col="red")
+lines(x.vec, dbeta(seq(x.bounds[1], x.bounds[2], 
+                    length.out=101), shape1=(n.returned.pilot+1), 
+                    shape2=(n.pilot-n.returned.pilot+1)), lty=2)
+
+rm(list=ls()) # Clear Environment
+
+n.tagged <- 100
+Periods <- 20 # Set to high value to ensure that end of study is observed
+F.true <- 0.4
+M.true <- 0.2
+S.true <- exp(-F.true - M.true)
+u.true <- F.true * (1-S.true) / (F.true + M.true)
+
+TagsAtRisk <- array(data=NA, dim=Periods)
+TagsAtRisk[1] <- n.tagged
+TagFates <- array(data=NA, dim=Periods) # Returns by period
+
+for (j in 2:Periods){
+  TagsAtRisk[j] <- rbinom(n=1, size=TagsAtRisk[j-1], prob=S.true)
+  TagFates[j-1] <- rbinom(n=1, size=(TagsAtRisk[j-1]
+                 -TagsAtRisk[j]),(F.true/(F.true+M.true))) 
+  # Random realization: fishing deaths
+  } #j
+TagFates[Periods] <- rbinom(n=1, size=(TagsAtRisk[Periods-1]
+                    -TagsAtRisk[Periods]),(F.true/(F.true+M.true)))
+t.Completed <- max(which(TagFates[]>0))
+# Locate period when study completed (last return)
+NatDeaths <- n.tagged - sum(TagFates)
+TagFates <- c(TagFates[1:t.Completed],NatDeaths) 
+# Returns + all natural deaths
+
+# Load necessary library
+library(rjags)
+library(R2jags)
+
+# JAGS code
+sink("Hearn.txt")
+cat("
+  model {
+  # Priors
+  M.est ~ dunif(0, 2)  # Instantaneous natural mortality rate
+  for (i in 1:t.Completed) {
+     F.est[i] ~ dunif(0,2) # Instantaneous fishing mortality rate
+     S.est[i] <- exp(-M.est - F.est[i])
+     u.est[i] <- F.est[i] * (1-S.est[i])/(F.est[i]+M.est) # FA/Z
+  } #i
+
+# Cell probabilities
+  p.est[1] <- u.est[1]
+  for (i in 2:t.Completed) {
+    p.est[i] <- prod(S.est[1:(i-1)])*u.est[i]
+      } #i
+    p.est[t.Completed+1] <- 1 - sum(p.est[1:t.Completed])   # Prob of not being seen again
+  TagFates[1:(t.Completed+1)] ~ dmulti(p.est[1:(t.Completed+1)], n.tagged)
+ }
+  ",fill=TRUE)
+sink()
+
+# Bundle data
+jags.data <- list("TagFates", "t.Completed", "n.tagged")
+
+# Initial values
+jags.inits <- function(){list(M.est=runif(1, 0, 2), F.est=runif(t.Completed, 0, 2))}
+
+model.file <- 'Hearn.txt'
+
+# Parameters monitored
+jags.params <- c("M.est", "F.est")
+
+# Call JAGS from R
+jagsfit <- jags(data=jags.data, jags.params, inits=jags.inits,
+                n.chains = 3, n.iter = 4000, n.burnin=2000,
+                model.file)
+print(jagsfit)
+plot(jagsfit)
+
+# Look at posterior distribution versus true value
+hist(jagsfit$BUGSoutput$sims.list$M.est, 
+     xlab="Estimated natural mortality rate", main="")
+abline(v=M.true, col="red")
+
+rm(list=ls()) # Clear Environment
+
+# Parameter values for three-yr experiment
+Periods <- 3  # Equal number of release and return periods assumed
+NTags <- 1000 # Number released each period
+NumTagged <- rep(NTags, Periods) # Release NTags fish each period
+
+u.true <- c(0.4, 0.25, 0.3) # Probability of fishing death
+v.true <- c(0.1, 0.15, 0.2) # Probability of natural death
+lam.true <- 1  # Reporting rate
+
+# Calculated value(s), array creation
+S.true <- 1 - u.true - v.true
+TagsAtRisk <- array(data=NA, dim=c(Periods, Periods))
+TagFate <- array(data=NA, dim=c(Periods, Periods+1))
+  # Extra column for tags not seen again
+
+for (i in 1:Periods){ 
+# Expected values for tags-at-risk, returned/not-seen-again
+  TagsAtRisk[i,i] <- NumTagged[i]
+  TagFate[i,i] <-  TagsAtRisk[i,i] * lam.true * u.true[i] 
+   # Returns in release period
+  j <- i+1
+  while(j <= Periods) {
+    TagsAtRisk[i,j] <- TagsAtRisk[i,(j-1)]*S.true[j-1]
+    TagFate[i,j] <- TagsAtRisk[i,j] * lam.true * u.true[j]
+    j <- j+1
+   } #while
+  TagFate[i, Periods+1] <- NTags-sum(TagFate[i,i:Periods]) # Tags not seen again
+  } #i
+
+RandRet <- array(data=NA, dim=c(Periods, Periods+1))  
+  # Extra column for fish not seen again
+#Random trial
+  for (i in 1:Periods) # Create upper diagonal matrix of random tag returns
+  {
+    RandRet[i,i:(Periods+1)] <- t(rmultinom(1, NumTagged[i], 
+                                        TagFate[i,i:(Periods+1)]))
+  } #i
+
+# Load necessary library
+library(rjags)
+library(R2jags)
+
+  # JAGS code
+  sink("TagReturn.txt")
+  cat("
+  model {
+  # Priors
+  lam.est <- 1 # Reporting rate assumed known (e.g. high-reward tags only)
+  for (i in 1:Periods) {
+     for (j in 1:3) # Rows are return periods, columns are fates
+       {
+         a[i,j] ~ dgamma(1,1)
+       } #j
+     S.est[i] <- a[i,1]/sum(a[i,]) # Probability of survival
+     u.est[i] <- a[i,2]/sum(a[i,]) # Probability of harvest (exploitation rate)
+     v.est[i] <- a[i,3]/sum(a[i,]) # Probability of natural death
+     # v.est[3] could also be obtained as 1-S.est[3]-u.est[3]
+  } #i
+
+# Cell probabilities
+  for (i in 1:Periods) {
+    p.est[i,i] <- lam.est * u.est[i]
+    for (j in (i+1):Periods) {
+      p.est[i,j] <- prod(S.est[i:(j-1)])*lam.est*u.est[j]
+      } #j
+    p.est[i,Periods+1] <- 1 - sum(p.est[i, i:Periods])
+    # p.est[i,Periods+1] = Prob of not being seen again
+    } #i
+  for (i in 1:Periods) {
+  RandRet[i,i:(Periods+1)] ~ dmulti(p.est[i,i:(Periods+1)], NumTagged[i])
+  }#i
+ }
+  ",fill=TRUE)
+  sink()
+
+# Bundle data
+  jags.data <- list("RandRet", "Periods", "NumTagged")
+
+# Initial values
+  a.init <- array(data=NA, dim=c(Periods, 3))
+  for (i in 1:3){
+    a.init[i,] <- runif(n=3, min=0, max=1)
+    a.init[i,] <- a.init[i,]/sum(a.init[i,]) # Rescale to sum to 1
+  }
+  jags.inits <- function(){ list(a=a.init)}
+
+  model.file <- 'TagReturn.txt'
+
+  # Parameters monitored
+  jags.params <- c(#"lam.est",
+                   "u.est", "v.est")
+  #, "S.est")
+
+   # Call JAGS from R
+  jagsfit <- jags(data=jags.data, jags.params, inits=jags.inits,
+                  n.chains = 3, n.thin = 1, n.iter = 4000, n.burnin=2000,
+                  model.file)
+  print(jagsfit)
+  plot(jagsfit)
+
+lam.true <- 0.9  # Reporting rate
+PlantedTags <- 30
+PlantReturns <- rbinom(n=1, size=PlantedTags, prob=lam.true)
+
+# Load necessary library
+library(rjags)
+library(R2jags)
+
+# JAGS code
+  sink("TagReturn.txt")
+  cat("
+  model {
+  # Priors
+  lam.est ~ dunif(0,1) # Reporting rate
+  for (i in 1:Periods) {
+     for (j in 1:3) # Rows are return periods, columns are fates
+       {
+         a[i,j] ~ dgamma(1,1)
+       } #j
+     S.est[i] <- a[i,1]/sum(a[i,]) # Probability of survival
+     u.est[i] <- a[i,2]/sum(a[i,]) # Probability of harvest (exploitation rate)
+     v.est[i] <- a[i,3]/sum(a[i,]) # Probability of natural death
+     # v.est[3] could also be obtained as 1-S.est[i]-u.est[i]
+  } #i
+
+# Cell probabilities
+  for (i in 1:Periods) {
+    p.est[i,i] <- lam.est * u.est[i]
+    for (j in (i+1):Periods) {
+      p.est[i,j] <- prod(S.est[i:(j-1)])*lam.est*u.est[j]
+      } #j
+    p.est[i,Periods+1] <- 1 - sum(p.est[i, i:Periods])   # Prob of not being seen again
+    } #i
+  for (i in 1:Periods) {
+  RandRet[i,i:(Periods+1)] ~ dmulti(p.est[i,i:(Periods+1)], NumTagged[i])
+  }#i
+  PlantReturns ~ dbin(lam.est, PlantedTags) # Additional likelihood component
+ }
+  ",fill=TRUE)
+  sink()
+
+# Bundle data
+  jags.data <- list("RandRet", "Periods", "NumTagged", "PlantedTags", "PlantReturns")
+
+# Initial values
+  a.init <- array(data=NA, dim=c(Periods, 3))
+  for (i in 1:3){
+    a.init[i,] <- runif(n=3, min=0, max=1)
+    a.init[i,] <- a.init[i,]/sum(a.init[i,])  # Rescale to sum to 1
+  }
+  jags.inits <- function(){ list(a=a.init)}
+
+  model.file <- 'TagReturn.txt'
+
+  # Parameters monitored
+  jags.params <- c("lam.est", "u.est", "v.est")
+  #, "S.est")
+
+   # Call JAGS from R
+  jagsfit <- jags(data=jags.data, jags.params, inits=jags.inits,
+                  n.chains = 3, n.thin = 1, n.iter = 10000, n.burnin=5000,
+                  model.file)
+  print(jagsfit)
+  plot(jagsfit)
+
+rm(list=ls()) # Clear Environment
+
+# Load necessary library
+library(rjags)
+library(R2jags)
+
+# JAGS code
+sink("dcat_example.txt")
+cat("
+model {
+
+# Priors
+    for (j in 1:3) {
+         a[j] ~ dgamma(1,1)
+         } #j
+     p[1] <- a[1]/sum(a[])
+     p[2] <- a[2]/sum(a[])
+     p[3] <- a[3]/sum(a[]) # Could also be obtained as 1-p[1]-p[2]
+
+# Likelihood
+  for (i in 1:N){
+    y[i] ~ dcat(p[])
+  } #i
+}
+    ",fill = TRUE)
+sink()
+
+# Bundle data
+y <- c(1, 1, 3, 3, 2) # Each observation drawn from category 1, 2, or 3
+N <- length(y)
+jags.data <- list("N", "y")
+
+model.file <- 'dcat_example.txt'
+
+# Parameters monitored
+jags.params <- c("p")
+
+# Call JAGS from R
+jagsfit <- jags(data=jags.data, jags.params, inits=NULL,
+                n.chains = 3, n.thin=1, n.iter = 2000,
+                model.file)
+print(jagsfit)
+plot(jagsfit)
+
+# Code modified from Kery and Schaub 2012, Section 9.5
+
+rm(list=ls()) # Clear Environment
+
+# Generation of simulated data
+# Define probabilities as well as number of occasions, 
+# states, observations and released individuals
+n.occasions <- 5
+n.tagged <- 100  # Simplify from Kery's version, 
+                 # only an initial release, and no spatial states
+
+u.true <- c(0.2, 0.1, 0.3, 0.2)
+v.true <- c(0.1, 0.15, 0.15, 0.1)
+S.true <- 1-u.true-v.true
+p <- c(1, 0.8, 0.8, 0.6, 0.7)
+#  Detection probability fixed at 1 for first period, 
+# n.occasions-1 searches (e.g start of period 2, 3, ..)
+
+n.states <- 3
+n.obs <- 3
+
+# Define matrices with survival, transition and detection probabilities
+
+# 1. State process matrix, dimensions 1=state[t], 2=state[t+1], 3=time
+PSI.STATE <- array(NA, dim=c(n.states, n.states, n.occasions-1))
+   for (t in 1:(n.occasions-1)){
+      PSI.STATE[,,t] <- matrix(c(
+      S.true[t], u.true[t], v.true[t],
+      0, 1, 0,
+      0, 0, 1), nrow = n.states, byrow = TRUE)
+      } #t
+
+# 2.Observation process matrix.  1=true state, 2=observed state, 3=time
+PSI.OBS <- array(NA, dim=c(n.states, n.obs, n.occasions))
+   for (t in 1:n.occasions){
+      PSI.OBS[,,t] <- matrix(c(
+      p[t], 0, 1-p[t],
+      0,  1, 0,  # Caught w/ high-reward tag, assume 100% reporting
+      0, 0, 1), nrow = n.states, byrow = TRUE)  # Natural deaths never detected
+      } #t
+
+# Define function to simulate multistate capture-recapture data
+simul.ms <- function(PSI.STATE, PSI.OBS, n.tagged, n.occasions, 
+                     unobservable = NA){
+   # Unobservable: number of state that is unobservable
+   CH <- CH.TRUE <- matrix(NA, ncol = n.occasions, nrow = n.tagged)
+   CH[,1] <- CH.TRUE[,1] <- 1 # All releases at t=1
+   for (i in 1:n.tagged){
+     for (t in 2:n.occasions){
+         # Multinomial trials for state transitions
+         CH.TRUE[i,t] <- which(rmultinom(n=1, size=1,
+                                  prob=PSI.STATE[CH.TRUE[i,t-1],,t-1])==1)
+         # which vector element=1; i.e., which state gets the random draw
+         # at time t given true state at t-1
+         # True state determines which row of PSI.STATE provides probabilities
+
+         # Multinomial trials for observation process
+         CH[i,t] <- which(rmultinom(1, 1, PSI.OBS[CH.TRUE[i,t],,t])==1)
+         # which observation gets the 1 random draw, given true time t state.
+         } #t
+      } #i
+
+    return(list(CH=CH, CH.TRUE=CH.TRUE)) # True (CH.TRUE) and observed (CH)
+   } # simul.ms
+
+# Load necessary library
+library(rjags)
+library(R2jags)
+
+# JAGS code for estimating model parameters
+sink("Mort_Tel_HRTag.txt")
+cat("
+model {
+
+# Priors
+for (t in 1:(n.occasions-1)) {
+     for (j in 1:3) { # Rows are return periods, columns are fates
+         a[t,j] ~ dgamma(1,1)
+         } #j
+     S.est[t] <- a[t,1]/sum(a[t,]) # Probability of survival
+     u.est[t] <- a[t,2]/sum(a[t,]) # Probability of harvest (exploitation rate)
+     v.est[t] <- a[t,3]/sum(a[t,]) # Probability of natural death
+     # v.est[t] could also be obtained as 1-S.est[t]-u.est[t]
+    } #t
+
+  p[1] ~ dbern(1)
+  for (t in 2:n.occasions){
+    p[t] ~ dunif(0,1)
+    }#t
+
+# Define state-transition and observation matrices
+# Probabilities of true state at t+1 given state at time t
+    for (t in 1:(n.occasions-1)){
+    ps[1,t,1] <- S.est[t]
+    ps[1,t,2] <- u.est[t]
+    ps[1,t,3] <- v.est[t]
+    ps[2,t,1] <- 0
+    ps[2,t,2] <- 1
+    ps[2,t,3] <- 0
+    ps[3,t,1] <- 0
+    ps[3,t,2] <- 0
+    ps[3,t,3] <- 1
+    } #t
+
+# Probabilities of observed states given true state
+    for (t in 2:n.occasions){
+    po[1,t,1] <- p[t]  # Row 1 true state = alive
+    po[1,t,2] <- 0
+    po[1,t,3] <- 1-p[t]
+    po[2,t,1] <- 0     # Row 2 true state = harvested
+    po[2,t,2] <- 1
+    po[2,t,3] <- 0
+    po[3,t,1] <- 0     # Row 3 true state= natural death
+    po[3,t,2] <- 0
+    po[3,t,3] <- 1
+    } #t
+
+    # Likelihood
+    for (i in 1:n.tagged){
+    z[i,1] <- y[i,1] # Latent state known at time of tagging (t=1)
+    for (t in 2:n.occasions){
+    # State process: draw state at time t given state at time t-1
+    z[i,t] ~ dcat(ps[z[i,(t-1)], (t-1),])
+    # Observation process: draw observed state given true state at time t
+    y[i,t] ~ dcat(po[z[i,t], t,])
+    } #t
+    } #i
+}
+    ",fill = TRUE)
+sink()
+
+# Generate initial values for z. Modified from Kery code for JAGS inits,
+# age-specific example 9.5.3
+z.init <- function(ch) {
+  # State 1=Obs 1 (alive) State 2=Obs 2 (fishing death). 
+  # Start w/ known states from obs capture-history,
+  # replace "3" with possible state(s)
+  ch[ch==3] <- -1  # Not observed so temporarily replace w/ neg value
+  ch[,1] <- NA  # Initial value not needed for release period
+  for (i in 1:nrow(ch)){
+    if(max(ch[i,], na.rm=TRUE)<2){
+      ch[i, 2:ncol(ch)] <- 1 
+      # Not detected dead so initialize as alive (after release period)
+      } else {
+      m <- min(which(ch[i,]==2))  # Period when fishing death first detected
+      if(m>2) ch[i, 2:(m-1)] <- 1  
+      # Initialize as alive up to period prior to harvest
+      ch[i, m:ncol(ch)] <- 2  # Initialize as dead after detected fishing death
+      } # if/else
+} # i
+  return(ch)
+} # z.init
+
+# Call function to get simulated true (CH.TRUE) and observed (CH) states
+sim <- simul.ms(PSI.STATE, PSI.OBS, n.tagged, n.occasions)
+y <- sim$CH
+
+# Bundle data
+jags.data <- list("n.occasions", "n.tagged", "y")
+
+# Initial values.
+jags.inits <- function(){ list(z = z.init(y))}
+
+model.file <- 'Mort_Tel_HRTag.txt'
+
+# Parameters monitored
+jags.params <- c("u.est", "v.est", "p")
+
+# Call JAGS from R
+jagsfit <- jags(data=jags.data, jags.params, inits=jags.inits,
+                n.chains = 3, n.thin=1, n.iter = 5000,
+                model.file)
+print(jagsfit)
+plot(jagsfit)
+
+Ch 8:
+
+# Fitting von Bertalanffy curve to simulated data
+rm(list=ls()) # Clear Environment
+
+# Choose von Bertalanffy parameter values and other simulation settings
+L_inf <- 80  # e.g., 80-cm fish
+k <- 0.3 # Slope
+t_0 <- -0.5 # Age at length 0
+MaxAge <- 12
+SystSample <- 5  # Number per age group
+N.AgeLen <- SystSample * MaxAge
+Age <- rep(1:MaxAge, each=SystSample)
+Var_L <- 10 # Variance about age-length relationship
+Len <- rnorm(n=N.AgeLen,L_inf*(1-exp(-k*(Age-t_0))), sd=sqrt(Var_L))
+
+plot(Age, Len, xlab="Age", ylab="Length (cm)")
+
+# Load necessary library
+library(rjags)
+library(R2jags)
+
+# JAGS code
+sink("GrowthCurve.txt")
+cat("
+model{
+
+# Priors
+
+ L_inf.est ~ dunif(0, 200)
+ k.est ~ dunif(0, 2)
+ t0.est ~ dunif(-5, 5)
+ Var_L.est ~ dunif(0,100)   # Variability in length at age
+
+# Calculated value
+ tau.est <- 1/Var_L.est
+
+# Likelihood
+ for (i in 1:N.AgeLen) {
+    Len_hat[i] <- L_inf.est*(1-exp(-k.est*(Age[i]-t0.est)))
+    Len[i] ~ dnorm(Len_hat[i], tau.est)
+ } #i
+}
+    ",fill=TRUE)
+sink()
+
+# Bundle data
+jags.data <- list("N.AgeLen", "Age", "Len")
+
+# Initial values
+jags.inits <- function(){ list(L_inf.est=runif(n=1, min=0, max=max(Len)),
+                               k.est=runif(n=1, min=0, max=2),
+                               t0.est=runif(n=1, min=-5, max=5),
+                               Var_L.est=runif(n=1, min=0, max=100))}
+
+model.file <- 'GrowthCurve.txt'
+
+# Parameters monitored
+jags.params <- c("L_inf.est", "k.est", "t0.est", "Var_L.est")
+
+# Call JAGS from R
+jagsfit <- jags(data=jags.data, jags.params, inits=jags.inits,
+                n.chains = 3, n.thin=1, n.iter = 10000,
+                model.file)
+print(jagsfit)
+plot(jagsfit)
+
+rm(list=ls()) # Clear Environment
+
+L_inf <- 80  # e.g., 80-cm fish
+k <- 0.3 # Slope
+Var_L <- 10 # Variance about age-length relationship
+N.Tag <- 120 # Number of fish recaptured at least once
+n <- rpois(N.Tag, lambda=0.1)+2 # Number of encounters for each recaptured individual, >2 uncommon
+# Generate vector for relative age at initial capture (true age + t0)
+Shape <- 5 # Parameters for gamma distribution generating relative ages
+Rate <- 2
+A <- rgamma(n=N.Tag, shape=Shape, rate=Rate) # Relative age vector
+hist(A, xlab="Relative age", main="")
+
+L <- array(data=NA, dim=c(N.Tag, max(n)))
+dt <- array(data=NA, dim=c(N.Tag, max(n)-1))
+for (i in 1:N.Tag){
+  for (j in 1:(n[i]-1)){
+    dt[i,j] <- rgamma(n=1, shape=6, rate=2) # Random dist of times at large
+  }
+}
+hist(dt, xlab="Time at large", main="")
+
+for (i in 1:N.Tag){
+  L[i,1] <- rnorm(n=1, mean=L_inf *(1.0 - exp(-k*A[i])), sqrt(Var_L))
+  for (j in 2:n[i]){
+    L[i, j] <- rnorm(n=1, L_inf*(1.0 - exp(-k*(A[i]+dt[i, j-1]))), sqrt(Var_L))
+  } #j
+} #i
+
+plot(A, L[,1], xlab="Relative age", ylab="Length at first capture")
+plot(dt[,1], (L[,2]-L[,1]), xlab="Time at large", ylab="Growth increment")
+plot(L[,1], (L[,2]-L[,1]), xlab="Length at first capture", ylab="Growth increment")
+
+# Load necessary library
+library(rjags)
+library(R2jags)
+
+# JAGS code
+# Code modified from Scherrer et al. 2021: model 4
+sink("vonBert_GrowthInc.txt")
+cat("
+model{
+# Priors
+  Var_L.est ~ dunif(0, 100) # Variance about expected length
+  tau.est <- 1/Var_L.est # Precision
+    k.est ~ dunif(0, 2)
+    L_inf.est ~ dunif(0, 200)
+    Shape.est ~ dunif(0, 100) # Gamma hyperparameters for relative age
+    Rate.est ~ dunif(0, 100)
+
+    # Likelihood
+    for (i in 1:N.Tag)   {
+        A.est[i] ~ dgamma(Shape.est, Rate.est) # Relative age (true age + t0)
+        L_Exp[i, 1] <-   L_inf.est *(1.0 - exp(-k.est*A.est[i])) # Expected length at capture
+        L[i, 1] ~ dnorm(L_Exp[i, 1], tau.est) # Length at initial capture
+        for (j in 2:n[i])   { # Recapture lengths
+            L_Exp[i, j] <-  L_inf.est*(1.0 - exp(-k.est*(A.est[i]+dt[i, j-1])))
+            L[i, j] ~ dnorm(L_Exp[i, j], tau.est)
+        } #j
+    } #i
+
+}
+    ",fill=TRUE)
+sink()
+
+# Bundle data
+jags.data <- list("N.Tag", "n", "L", "dt")
+
+# Initial values
+jags.inits <- function(){ list(L_inf.est=runif(n=1, min=0, max=200),
+                               k.est=runif(n=1, min=0, max=2),
+                               Var_L.est=runif(n=1, min=0, max=100),
+                               Shape.est=runif(n=1, min=0, max=100),
+                               Rate.est=runif(n=1, min=0, max=100)
+                               )}
+
+model.file <- 'vonBert_GrowthInc.txt'
+
+# Parameters monitored
+jags.params <- c("L_inf.est", "k.est", "Var_L.est" ,"Shape.est", "Rate.est"
+)
+
+# Call JAGS from R
+jagsfit <- jags(data=jags.data, jags.params, inits=jags.inits,
+                n.chains = 3, n.thin=1, n.iter = 20000,
+                model.file)
+print(jagsfit)
+plot(jagsfit)
+
+# Fitting length:weight relationship to simulated data
+rm(list=ls()) # Clear Environment
+
+# Choose parameter values and other simulation settings
+ln_L_W_a <- -12 # e.g., L in cm, weight in kg
+L_W_b <- 3.2
+MinL <- 20
+MaxL <- 80
+SystSample <- 3  # Number per length group
+Len <- rep(seq(from=MinL, to=MaxL, by=2), each=SystSample)
+SampSize <- length(Len)
+W_Var <- 0.1 # Ln-scale variance in weight at length
+Wgt <- rlnorm(n=SampSize, mean=(ln_L_W_a+log(Len^(L_W_b))),
+              sd=sqrt(W_Var))
+
+par(mfcol=c(1,1)) # Ensure default of 1 panel (changes in trace plots)
+par(mar=c(5.1, 4.1, 4.1, 2.1)) # Set to default margins
+plot(Len, Wgt, xlab="Length (cm)", ylab="Weight (kg)")
+
+# Load necessary library
+library(rjags)
+library(R2jags)
+
+# JAGS code
+sink("LenWgt.txt")
+cat("
+model{
+
+# Priors
+ ln_L_W_a.est ~ dunif(-20, 20)
+ L_W_b.est ~ dunif(1, 4)
+ W_Var.est ~ dunif(0,0.5)   # Multiplicative error. Variability around ln-scale line
+
+# Calculated value
+ precision <- 1/W_Var.est
+
+# Likelihood
+ for (i in 1:SampSize) {
+    lnWgt_hat[i] <- ln_L_W_a.est+log(Len[i]^L_W_b.est)
+    Wgt[i] ~ dlnorm(lnWgt_hat[i], precision)
+ } #i
+}
+    ",fill=TRUE)
+sink()
+
+# Bundle data
+jags.data <- list("SampSize", "Wgt", "Len")
+
+# Initial values
+
+jags.inits <- function(){ list(ln_L_W_a.est=runif(n=1, min=-20, 20),
+                               L_W_b.est=runif(n=1, min=1, max=4),
+                               W_Var.est=runif(n=1, min=0, max=0.5))}
+
+model.file <- 'LenWgt.txt'
+
+# Parameters monitored
+jags.params <- c("ln_L_W_a.est", "L_W_b.est", "W_Var.est")
+
+# Call JAGS from R
+jagsfit <- jags(data=jags.data, jags.params, inits=jags.inits,
+                n.chains = 3, n.thin=1, n.iter = 5000,
+                model.file)
+print(jagsfit)
+plot(jagsfit)
+
+par(mar=c(5.1, 4.1, 4.1, 2.1)) # Set default margins
+plot(jagsfit$BUGSoutput$sims.list$ln_L_W_a.est,
+     jagsfit$BUGSoutput$sims.list$L_W_b.est)
+cor(jagsfit$BUGSoutput$sims.list$ln_L_W_a.est,
+    jagsfit$BUGSoutput$sims.list$L_W_b.est)
+
+jagsfit.mcmc <- as.mcmc(jagsfit) # Creates an MCMC object for plotting
+par(mar=c(1,1,1,1)) # Avoid error for "figure margins too large"
+plot(jagsfit.mcmc) # Trace and density plots
+autocorr.diag(jagsfit.mcmc)
+
+par(mar=c(5.1, 4.1, 4.1, 2.1)) # Restore default margins
+plot(Len, Wgt, xlab="Length (cm)", ylab="Weight (kg)")
+par_a <- exp(as.numeric(jagsfit$BUGSoutput$mean$ln_L_W_a.est))
+par_b <- as.numeric(jagsfit$BUGSoutput$mean$L_W_b.est)
+Wgt_hat <- par_a*(Len^par_b)
+points(Len, Wgt_hat, type="l", col="red")
+
+Ch 9:
+SpBio <- seq(from=10, to=200, by=5)
+a <- 0.001
+b <- 0.1
+R <- 1/(a+b/SpBio)
+plot(SpBio, R)
+
+rm(list=ls()) # Clear Environment
+
+A <- 10 # Arbitrary. If changed, redo maturity and meanwt vectors
+Y <- 12 # Arbitrary. If changed, redo AnnualF vector
+
+AnnualF <- c(0.59, 0.41, 0.74, 0.91, 0.86, 0.74, 1.07, 0.9, 0.87, 1.1, 0.93)
+# Arbitrary, increasing trend to create contrast in SpBio. Redo if Y changes
+AnnualM <- 0.2
+
+# F by age, using separable model
+Fishery_k <- 1 # Slope for logistic function
+Fishery_a_50 <- 2 # Age at 0.5 selectivity
+SelF <- array(data=NA, dim=A) # Fishery selectivity pattern
+F_a <- array(data=NA, dim=c(A,(Y-1))) # Matrix F by age and year
+Z_a <- array(data=NA, dim=c(A,(Y-1))) # Matrix Z by age and year
+S_a <- array(data=NA, dim=c(A,(Y-1))) # Matrix survival rate by age and year
+for (a in 1:A){
+  SelF[a] <- 1/(1+exp(-Fishery_k*(a-Fishery_a_50)))
+  } #a
+#plot(SelF)
+for (y in 1:(Y-1)) {
+  for (a in 1:A){
+    F_a[a,y] <- AnnualF[y] * SelF[a]
+    Z_a[a,y] <- F_a[a,y]+AnnualM
+    S_a[a,y] <- exp(-Z_a[a,y])
+  } #a
+} #y
+
+N <- array(data=NA, dim=c(A, Y))
+
+BH_alpha <- 1/1E5 # Parameter defining Beverton-Holt asymptotic recruitment
+BH_beta <- 0.1 # Arbitrary
+SD_rec <- 0.25 # Low level of lognormal error in recruitment
+
+# Set up year-1 vector based on asymptotic recruitment and year-1 survival
+Mat <- c(0, 0, 0.2, 0.4, 0.8, 1, 1, 1, 1, 1) 
+# Arbitrary maturity schedule. Redo if max age (A) changes
+Wgt <- c(0.01, 0.05, 0.10, 0.20, 0.40, 0.62, 0.80, 1.01, 1.30, 1.56) 
+# Mean wt. Redo if A changes
+SpBio <- array(data=NA, dim=(Y-1)) # Spawning biomass vector
+# Year-1 N (arbitrarily) from asymptotic recruitment, year-1 survival.
+N[1,1] <- trunc(1/BH_alpha*rlnorm(n=1, 0, SD_rec))
+for (a in 2:A){
+  N[a,1] <- rbinom(n=1, N[(a-1),1], S_a[(a-1),1])
+}#a
+for (y in 2:Y){
+  SpBio[y-1] <- sum(N[,y-1]*Wgt*Mat) # Spawning stock biomass
+  N[1,y] <- trunc(1/(BH_alpha+BH_beta/SpBio[y-1])*rlnorm(n=1, 0, SD_rec))
+  for (a in 2:A){
+    N[a,y] <- rbinom(1, N[(a-1), (y-1)], S_a[(a-1),(y-1)])
+  } #a
+} #y
+#plot(SpBio,N[1,2:Y], ylab="Recruits", xlab="Spawning stock biomass")
+
+# Generate survey data on recruitment and spawning stock
+Survey_q <- 1E-3 # Arbitrary catchability coefficient for survey
+SD_survey <- 0.2 # Arbitrary ln-scale SD
+Exp_ln_B <- log(Survey_q*SpBio)
+Survey_B <- rlnorm(n=Y, meanlog=Exp_ln_B, sdlog=SD_survey)
+#plot(SpBio, Survey_B[1:Y-1])
+Exp_ln_R <- log(Survey_q*N[1,2:Y])
+Survey_R <- c(NA,rlnorm(n=(Y-1), meanlog=Exp_ln_R, sdlog=SD_survey))
+#plot(N[1,], Survey_R)
+
+# Load necessary library
+library(rjags)
+library(R2jags)
+
+sink("StockRecruit.txt")
+cat("
+model {
+# Model parameters: Beverton-Holt alpha and beta, SD for fitted curve
+
+# Priors
+ BH_alpha.est ~ dunif(0, 10)
+ BH_beta.est ~ dunif(0, 10)
+ SD_rec.est ~ dunif(0, 10)
+ tau <- pow(SD_rec.est, -2)
+
+# Likelihood
+    for(y in 2:Y) {
+      lnR_hat[y] <- log(1/(BH_alpha.est+BH_beta.est/Survey_B[y-1]))
+      Survey_R[y] ~ dlnorm(lnR_hat[y],tau)
+      R_hat[y] <- exp(lnR_hat[y])
+      } #y
+}
+    ",fill=TRUE)
+sink()
+
+# Bundle data
+jags.data <- list("Y", "Survey_R", "Survey_B")
+
+# Initial values
+y <- Survey_R[2:Y]
+x <- Survey_B[1:(Y-1)]
+nls_init <- nls(y ~ 1/(BH_a_start+BH_b_start/x),
+                start = list(BH_a_start = 0.001, BH_b_start = 0.001),
+                algorithm="port", 
+                lower=c(1E-6, 0), upper=c(1000,1000))
+#summary(nls_init)
+nls_save <- coef(nls_init)
+#y_hat <- 1/(nls_save[1]+nls_save[2]/x)
+#plot(x,y)
+#points(x,y_hat, col="red", type="l")
+
+jags.inits <- function(){ list(BH_alpha.est=nls_save[1],
+                               BH_beta.est=nls_save[2],
+                               SD_rec.est=runif(n=1, min=0, max=0.75))}
+
+model.file <- 'StockRecruit.txt'
+
+# Parameters monitored
+jags.params <- c("BH_alpha.est", "BH_beta.est", "SD_rec.est",
+                 "R_hat")
+
+# Call JAGS from R
+jagsfit <- jags(data=jags.data, jags.params, inits=jags.inits,
+                n.chains = 3, n.thin=1, n.iter = 10000,
+                model.file)
+print(jagsfit)
+plot(jagsfit)
+
+BH.DIC <- jagsfit$BUGSoutput$DIC # Used in next section
+
+min.y <- min(Survey_R[2:Y],jagsfit$BUGSoutput$mean$R_hat)
+max.y <- max(Survey_R[2:Y],jagsfit$BUGSoutput$mean$R_hat)
+
+df.xy <- data.frame(Survey_B[1:(Y-1)], Survey_R[2:Y],jagsfit$BUGSoutput$mean$R_hat)
+df.xy <- df.xy[order(df.xy[,1]),]  # Sort by survey index for plotting
+
+plot(df.xy[,1],df.xy[,2], ylab="Recruitment index",
+     xlab="Spawning Stock Index", ylim=c(min.y, max.y))
+points(df.xy[,1], df.xy[,3], type="l", col="red")
+
+# Constant recruitment fit
+# JAGS code ##################################
+
+sink("StockRecruit.txt")
+cat("
+model {
+# Model parameters: Beverton-Holt alpha, SD for fitted curve
+
+# Priors
+ BH_alpha.est ~ dunif(0, 10)
+ SD_rec.est ~ dunif(0, 10)
+ tau <- pow(SD_rec.est, -2)
+
+# Likelihood
+    for(y in 2:Y) {
+      lnR_hat[y] <- log(1/BH_alpha.est)
+      Survey_R[y] ~ dlnorm(lnR_hat[y],tau)
+      R_hat[y] <- exp(lnR_hat[y])
+      } #y
+}
+    ",fill=TRUE)
+sink()
+
+# Bundle data
+jags.data <- list("Y", "Survey_R")
+
+jags.inits <- function(){ list(BH_alpha.est=nls_save[1],
+                               SD_rec.est=runif(n=1, min=0, max=0.75))}
+
+model.file <- 'StockRecruit.txt'
+
+# Parameters monitored
+jags.params <- c("BH_alpha.est", "SD_rec.est", "R_hat")
+
+# Call JAGS from R
+jagsfit <- jags(data=jags.data, jags.params, inits=jags.inits,
+                n.chains = 3, n.thin=1, n.iter = 10000,
+                model.file)
+print(jagsfit)
+plot(jagsfit)
+ConstR.DIC <- jagsfit$BUGSoutput$DIC
+ConstR.DIC - BH.DIC
+
+Ch 10:
+
+rm(list=ls()) # Clear Environment
+
+# Simulation to create population size and field data
+Y <- 10
+
+LowS <- 0.5 # Adult survival, arbitrary lower bound
+HighS <- 0.9 # Arbitrary upper bound
+AnnualS <- runif(n=(Y-1), min=LowS, max=HighS)
+
+MeanR <- 400 # Arbitrary mean annual recruitment
+N.r <- array(data=NA, dim=Y)
+SD_rec <- 0.25 # Low level of lognormal error in recruitment
+N.r <- trunc(MeanR * rlnorm(n=Y, 0, SD_rec))
+N.a <- array(data=NA, dim=Y)
+N.a[1] <- N.r[1] + rpois(n=1, lambda=MeanR) # Arbitrary year-1 population size
+for (y in 2:Y){
+  N.a[y] <- N.r[y] + rbinom(n=1, size=N.a[y-1], prob=AnnualS[y-1])
+} #y
+
+# Short-term (closed) two-sample population estimate
+CapProb <- 0.2 # Fraction of population sampled
+n1 <- rbinom(n=Y, size=N.a, prob=CapProb) # Caught and marked in first sample
+n2 <- rbinom(n=Y, size=N.a, prob=CapProb) 
+# Caught and examined for marks in second sample
+m2 <- rbinom(n=Y, size=n2, prob=n1/N.a) # Marked fish in second sample
+
+# Telemetry information on annual survival
+TelRelease <- 20 # Number of telemetry tags to release annually
+TelTags <- array(data=NA, dim=c((Y-1),Y))
+for (y in 1:(Y-1)){
+  TelTags[y,y] <- TelRelease
+  for (t in ((y+1):Y)){
+    TelTags[y,t] <- rbinom(n=1, size=TelTags[y,(t-1)], prob=AnnualS[t-1])
+  }} # y,t
+
+# Load necessary library
+library(rjags)
+library(R2jags)
+
+# JAGS code ##################################
+sink("IPM.txt")
+cat("
+model {
+
+# Priors
+
+ Mean_lnR.est ~ dnorm(0, 1E-6)  # Recruitment uses ln-scale parameter
+ SD_rec.est ~ dunif(0, 10)
+ tau <- pow(SD_rec.est, -2)
+ for(y in 1:(Y-1)) {
+    N.r.est[y] ~ dlnorm(Mean_lnR.est,tau)
+     # Hierarchical structure for recruitment
+  } #y
+
+for (y in 1:(Y-1)){
+  AnnualS.est[y] ~ dunif(0,1)  # Uninformative prior, adult survival
+}#y
+
+# Population projection
+ N.a.est[1] ~ dpois((n1[1]+1)*(n2[1]+1)/(m2[1]+1)-1) 
+  # Year-1 total, Chapman mod in case m2=0
+  # Year-1 estimate needed to start model because no prior year information
+ for(y in 2:Y) {
+     N.a.est[y] ~ dpois(N.r.est[y-1] + (AnnualS.est[y-1]*N.a.est[y-1]))
+     # Index shifted by one year for recruitment estimates
+     } #y
+
+#Likelihoods
+# Two-sample capture-recapture estimate for total pop size at start of year
+  for (y in 2:Y){  # m2[1] used above to get starting pop size
+    m2[y] ~ dbin((n1[y]/N.a.est[y]), n2[y])
+    } #y
+
+# Telemetry information on survival rate
+for (y in 1:(Y-1)){
+  for (t in ((y+1):Y)){
+    TelTags[y,t] ~ dbin(AnnualS.est[t-1],TelTags[y,(t-1)])
+  }} # y, t
+}
+    ",fill=TRUE)
+sink()
+
+# Bundle data
+jags.data <- list("Y", "n1", "n2", "m2", "TelTags")
+
+# Initial values
+jags.inits <- function(){ list(N.r.est= rlnorm(n=(Y-1), meanlog=10, sdlog=1),
+                               AnnualS.est=runif(n=(Y-1), min=0, max=1))}
+
+model.file <- 'IPM.txt'
+
+# Parameters monitored
+jags.params <- c("AnnualS.est", "N.a.est", "N.r.est", "SD_rec.est")
+
+# Call JAGS from R
+jagsfit <- jags(data=jags.data, jags.params, inits=jags.inits,
+                n.chains = 3, n.thin=1, n.iter = 40000,
+                model.file)
+print(jagsfit)
+plot(jagsfit)
+
+# Code for plots comparing true values and model estimates
+par(mfrow = c(1, 3))
+plot(seq(1:(Y-1)), 
+     jagsfit$BUGSoutput$mean$AnnualS.est, ylab="Annual S", xlab="Year",
+     type="b", pch=19, ylim=c(min(AnnualS,
+                                  jagsfit$BUGSoutput$mean$AnnualS.est),
+                              max(AnnualS,jagsfit$BUGSoutput$mean$AnnualS.est)))
+points(AnnualS, col="blue", type="b", pch=17)
+
+#hist(jagsfit$BUGSoutput$sims.list$MeanR.est, main="", xlab="Mean recruitment")
+#abline(v=MeanR, col="red")
+
+plot(seq(1:(Y-1)), 
+     jagsfit$BUGSoutput$mean$N.r.est, ylab="Annual recruitment (years 2-Y)", xlab="",
+     type="b", pch=19, ylim=c(min(N.r,
+                                  jagsfit$BUGSoutput$mean$N.r.est),
+                              max(N.r,jagsfit$BUGSoutput$mean$N.r.est)))
+points(N.r[2:Y], col="blue", type="b", pch=17)
+par(xpd=TRUE) # Turn off clipping to put legend above plot
+legend("top",
+       legend = c("Est", "True"), col = c("black", "blue"),
+       pch = c(19,17), text.col = "black",  horiz = T , inset = c(0, -0.2))
+par(xpd=FALSE)
+
+MR_N.hat <- (n1+1)*(n2+1)/(m2+1) -1 # Chapman modification in case m2=0
+plot(seq(1:Y), jagsfit$BUGSoutput$mean$N.a.est, 
+     ylab="Pop size (includes new recruits)", xlab="Year",
+     type="b", pch=19, 
+     ylim=c(min(N.a,jagsfit$BUGSoutput$mean$N.a.est,MR_N.hat),
+            max(N.a,jagsfit$BUGSoutput$mean$N.a.est,MR_N.hat)))
+points(N.a, col="blue", type="b", pch=17) # True adult pop size
+points(MR_N.hat, col='red', type="b") # Capture-recapture point estimates
+
+rm(list=ls()) # Clear Environment
+
+# Simulation to create survey and fishery catch-at-age matrices
+
+A <- 8 # Arbitrary number of ages and years (but enough to fit model)
+Y <- 12
+
+LowF <- 0.1 # Arbitrary lower bound
+HighF <- 0.5 # Arbitrary upper bound
+
+AnnualF <- runif(Y, min=LowF, max=HighF)
+AnnualM <- 0.2 # Fixed
+
+# F by age, using separable model
+Fishery_k <- 2 # Slope for logistic function
+Fishery_a_50 <- 4 # Age at 0.5 selectivity
+SelF <- array(data=NA, dim=A) # Fishery selectivity pattern
+F_a <- array(data=NA, dim=c(A,Y)) # Matrix for F by age and year
+Z_a <- array(data=NA, dim=c(A,Y)) # Matrix for Z by age and year
+Exp_C_f <- array(data=NA, dim=c(A,Y)) # Fishery catch-at-age matrix
+C_f <- array(data=NA, dim=c(A,Y)) # Obs fishery catch-at-age matrix
+Exp_C_s <- array(data=NA, dim=c(A,Y)) # Survey catch-at-age matrix
+C_s <- array(data=NA, dim=c(A,Y)) # Obs survey catch-at-age matrix
+S_a <- array(data=NA, dim=c(A,(Y-1))) # Matrix for survival rate
+for (a in 1:A){
+  SelF[a] <- 1/(1+exp(-Fishery_k*(a-Fishery_a_50)))
+} #a
+#plot(SelF)
+for (y in 1:(Y)) {
+  for (a in 1:A){
+    F_a[a,y] <- AnnualF[y] * SelF[a]
+  } #a
+} #y
+Z_a <- F_a + AnnualM
+S_a <- exp(-Z_a)
+
+MeanR <- 1E5 # Arbitrary mean initial cohort size
+N <- array(data=NA, dim=c(A, Y))
+SD_rec <- 0.25 # Low level of lognormal error in recruitment
+N[1,] <- trunc(MeanR * rlnorm(n=Y, 0, SD_rec)) 
+# Starting size of each cohort at first age
+for (a in 2:A){
+  N[a,1] <- trunc(prod(S_a[1:(a-1),1])*MeanR * rlnorm(n=1, 0, SD_rec))
+  # Use year-1 S_a to generate year-1 N
+  for (y in 2:Y){
+    N[a,y] <- rbinom(1, N[(a-1), (y-1)], S_a[(a-1),(y-1)])
+  } #y
+} #a
+
+for (y in 1:(Y-1)){ # Deaths due to fishing (binomial random variate)
+  for (a in 1:(A-1)){
+    Exp_C_f[a,y] <- rbinom(1, N[a,y]-N[(a+1),(y+1)],(F_a[a,y]/Z_a[a,y]))
+  } #y
+} #a
+for (y in 1:(Y-1)){ # Random catch last age
+  Exp_C_f[A,y] <- rbinom(1,N[A,y],F_a[A,y]*(1-exp(-Z_a[A,y]))/Z_a[A,y])
+} #y
+for (a in 1:A){ # Random catch last year
+  Exp_C_f[a,Y] <- rbinom(1,N[a,Y],F_a[a,Y]*(1-exp(-Z_a[a,Y]))/Z_a[a,Y])
+} #y
+for (y in 1:Y){
+  C_f[,y] <- as.vector(t(rmultinom(n=1, size=sum(Exp_C_f[,y]), 
+                                   prob=Exp_C_f[,y])))
+} #y
+
+# Generate survey catch-at-age matrix
+Survey_q <- 1E-3 # Catchability coefficient (Adjust relative to MeanR)
+Survey_k <- -2 # Slope for logistic function
+Survey_a_50 <- 4 # Age at 0.5 selectivity
+SelS <- array(data=NA, dim=A) # Survey selectivity pattern
+for (a in 1:A){
+  SelS[a] <- 1/(1+exp(-Survey_k*(a-Survey_a_50)))
+} #a
+#plot(SelS)
+
+for (y in 1:Y) {
+  for (a in 1:A){
+    Exp_C_s[a,y] <- Survey_q*SelS[a]*N[a,y]
+  } #a
+} #y 
+
+for (y in 1:Y){
+  C_s[,y] <- as.vector(t(rmultinom(n=1, size=sum(Exp_C_s[,y]), 
+                                   prob=Exp_C_s[,y])))
+  } #y
+
+# Load necessary library
+library(rjags)
+library(R2jags)
+
+# JAGS code ##################################
+sink("CatchAge.txt")
+cat("
+model {
+# Model parameters: AnnualF[1:Y], k and a_50 for fishery and survey, survey q,
+# Mean recruitment, SD, and annual deviations years 1:Y,
+# initial numbers ages 2:A for year 1
+
+ Mean_lnR.est ~ dnorm(0, 1E-6)
+   # Recruitment uses ln-scale parameter
+ MeanR.est <- exp(Mean_lnR.est)
+ SD_rec.est ~ dunif(0, 10)
+ tau <- pow(SD_rec.est, -2)
+ for(y in 1:Y) {
+    Recruit.est[y] ~ dlnorm(Mean_lnR.est,tau)
+     # Hierarchical structure for recruitment
+    N.est[1,y]<-Recruit.est[y] }
+
+    for(a in 2:A){
+      Initial.est[a-1] ~ dlnorm(0, 1E-6)
+        # Offset index to run Initials vector from 1 to A-1
+    N.est[a,1]<-Initial.est[a-1] }
+
+Fishery_k.est ~ dnorm(0, 1E-3)
+  # Allow for positive or negative slope for logistic function
+Fishery_a_50.est ~ dunif(0,A)
+for (a in 1:A){
+  SelF.est[a] <- 1/(1+exp(-Fishery_k.est*(a-Fishery_a_50.est)))
+  }#a
+
+for (y in 1:Y){
+  AnnualF.est[y] ~ dunif(0,2) # Arbitrary range
+  for (a in 1:A){
+    F_a.est[a,y] <- AnnualF.est[y] * SelF.est[a]
+      # Separable model (F[a,y]=Sel[a]*F[y])
+    Z_a.est[a,y] <- F_a.est[a,y] + AnnualM
+      # Assume that M is known (fixed externally)
+  }#a
+}#y
+
+Survey_q.est ~ dgamma(1,1) # Uninformative nonnegative prior
+Survey_k.est ~ dnorm(0, 1E-3)
+  # Allow for positive or negative slope for logistic function
+Survey_a_50.est ~ dunif(0, A)
+for (a in 1:A){
+  SelS.est[a] <- 1/(1+exp(-Survey_k.est*(a-Survey_a_50.est)))
+  } #a
+
+    # Population projection
+    for(a in 2:A) {
+   for(y in 2:Y) {
+     N.est[a,y] ~ dbin(exp(-AnnualM-F_a.est[(a-1),(y-1)]),
+                         trunc(N.est[a-1,y-1])) } }
+
+    #Likelihoods
+    for (a in 1:A) {
+   for (y in 1:Y) {
+     C_f.est[a,y] <- N.est[a,y]*F_a.est[a,y]*(1-exp(-Z_a.est[a,y]))
+                      /Z_a.est[a,y]
+     C_f[a,y] ~ dpois(C_f.est[a,y])
+     C_s.est[a,y] <- N.est[a,y]*Survey_q.est*SelS.est[a]
+     C_s[a,y] ~ dpois(C_s.est[a,y])
+   } } # y, a
+   for (y in 1:Y){
+    N.est.total[y] <- sum(N.est[,y])
+   }
+
+}
+    ",fill=TRUE)
+sink()
+
+# Bundle data
+jags.data <- list("Y", "A", "C_f", "C_s", "AnnualM")
+
+# Initial values
+jags.inits <- function(){ list(Mean_lnR.est=rlnorm(n=1, meanlog=10, sdlog=1),
+                               Recruit.est=rlnorm(n=Y, meanlog=10, sdlog=1),
+                               Initial.est=rlnorm(n=(A-1), meanlog=10, sdlog=1),
+                               Survey_q.est=rgamma(n=1, shape=1, scale=1),
+                               SD_rec.est=runif(n=1, min=0, max=10),
+                               AnnualF.est=runif(n=Y, min=0, max=2))}
+
+model.file <- 'CatchAge.txt'
+
+# Parameters monitored
+jags.params <- c("AnnualF.est", "Recruit.est", "Initial.est",
+                 "SelF.est", "Survey_q.est", "MeanR.est",
+                 "SD_rec.est", "SelS.est", "N.est.total")
+
+# Call JAGS from R
+jagsfit <- jags(data=jags.data, jags.params, inits=jags.inits,
+                n.chains = 3, n.thin=10, n.iter = 200000,
+                model.file)
+print(jagsfit)
+plot(jagsfit)
+
+par(mfrow = c(1, 2))
+plot(seq(1:Y), jagsfit$BUGSoutput$mean$AnnualF.est, ylab="Annual F", xlab="Year",
+     type="b", pch=19, ylim=c(min(AnnualF,jagsfit$BUGSoutput$mean$AnnualF.est),
+                              max(AnnualF,jagsfit$BUGSoutput$mean$AnnualF.est)))
+points(AnnualF, col="blue", type="b")
+
+N.total <- array(data=NA, dim=Y)
+for (y in 1:Y){
+  N.total[y] <- sum(N[,y])
+}
+plot(seq(1:Y), jagsfit$BUGSoutput$mean$N.est.total, ylab="Total N", xlab="Year",
+     type="b", pch=19, ylim=c(min(N.total,jagsfit$BUGSoutput$mean$N.est.total),
+                              max(N.total,jagsfit$BUGSoutput$mean$N.est.total)))
+points(N.total[], col="blue", type="b")
+
+plot(seq(1:A), jagsfit$BUGSoutput$mean$SelF.est, ylab="Fishery selectivity",
+     xlab="Age", type="b", pch=19, ylim=c(0,1))
+points(SelF, col="blue", type="b")
+
+plot(seq(1:A), jagsfit$BUGSoutput$mean$SelS.est, ylab="Survey selectivity",
+     xlab="Age", type="b", pch=19, ylim=c(0,1))
+points(SelS, col="blue", type="b")
