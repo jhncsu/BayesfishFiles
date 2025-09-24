@@ -15,6 +15,7 @@ N_hat # Prints N_hat in Console window
 
 Ch 3:
 
+# Bernoulli
 N.obs <- 30
 p <- 0.4
 y <- rbinom(n=N.obs, prob=p, size=1)
@@ -35,6 +36,7 @@ Counts <- table(y)
 barplot(Counts)
 
 
+# Binomial
 rm(list=ls()) # Clear Environment
 
 Clubs <-c(0, 0, 3, 3, 1, 1)  # Drawing five cards, with replacement
@@ -67,6 +69,7 @@ barplot(Counts)
 Counts/N.trials # Vector division - probabilities of 0-5 Clubs
 
 
+# Multinomial
 rm(list=ls()) # Clear Environment
 
 x <-c(2,3,3,0,2,0)  # Generated using die, equal cell probabilities
@@ -95,6 +98,7 @@ age.vec <- seq(1,6, by=1)
 barplot(x.vec, names.arg=age.vec, xlab="Age", ylab="Number of fish")
 
 
+# Poisson
 rm(list=ls()) # Clear Environment
 
 N <- 30
@@ -119,6 +123,7 @@ mean(Count)
 var(Count)
 
 
+# Negative binomial
 rm(list=ls()) # Clear Environment
 
 N <- 30
@@ -133,6 +138,7 @@ mean(Count)
 var(Count)
 
 
+# Uniform
 rm(list=ls()) # Clear Environment
 
 Reps <- 30 # Replicate draws from a uniform distribution
@@ -140,6 +146,7 @@ p <- runif(n=Reps)# Default range of 0-1. Can specify using min, max
 hist(p, breaks=5, main="")
 
 
+# Beta
 rm(list=ls()) # Clear Environment
 
 Reps <- 200 # Replicate draws from a beta distribution
@@ -149,6 +156,7 @@ x <- rbeta(n=Reps, shape1=alpha, shape2=beta)
 hist(x, main="", xlab="Probability")
 
 
+# Normal
 rm(list=ls()) # Clear Environment
 
 Reps <- 30 # Replicate draws from a normal distribution
@@ -156,6 +164,7 @@ Len <- rnorm(n=Reps, mean=30, sd=2)
 hist(Len, main="")
 
 
+# Lognormal
 rm(list=ls()) # Clear Environment
 
 Reps <- 200
@@ -164,13 +173,15 @@ ln.v <- 0.5 # Ln-scale variance
 y <- rlnorm(n=Reps, mean=ln.m, sd=sqrt(ln.v))
 
 hist(y, main="Lognormal distribution")
-Exp.mean <- exp(ln.m+(ln.v/2)) # Calculate arithmetic scale expected mean
-abline(v=Exp.mean, col="red")
-Exp.var <- (exp(2*ln.m+ln.v))*(exp(ln.v)-1) # Arithmetic scale expected variance
+Exp.mean <- exp(ln.m+(ln.v/2)) # Arithmetic scale expected mean
+abline(v=Exp.mean, lty=3, lwd=3)
+Exp.var <- (exp(2*ln.m+ln.v))*(exp(ln.v)-1) 
+  # Arithmetic scale expected variance
 mean(y)
 var(y)
 
 
+# Gamma
 rm(list=ls()) # Clear Environment
 
 Reps <- 200 # Replicate draws from a gamma distribution
@@ -186,6 +197,7 @@ var(x)
 
 Ch 4:
 
+# Using simulation
 rm(list=ls()) # Clear Environment
 
 # Two-sample population estimate
@@ -210,7 +222,8 @@ mean(N.hat)
 quantile(N.hat, probs=c(0.025, 0.5, 0.975), na.rm=TRUE)
 # quantile function provides empirical confidence bounds and median
 
-
+# Using Bayesian methods
+# Example: mark-recapture
 rm(list=ls()) # Clear Environment
 
 # Arbitrary 'observed' values for analysis
@@ -264,6 +277,7 @@ hist(jagsfit$BUGSoutput$sims.list$N.hat, main="", xlab="Population estimates")
 abline(v=N.true, lty=3, lwd=3)
 
 
+# Using MarkedFraction as the model parameter
 rm(list=ls()) # Clear Environment
 
 # Load necessary library packages
@@ -315,6 +329,7 @@ print(jagsfit, digits=3)
 plot(jagsfit)
 
 
+# Debugging code
 rm(list=ls()) # Clear Environment
 
 #1
@@ -355,6 +370,7 @@ mean(N.hat)
 quantile(N.hat, probs=c(0.5), na.rm=TRUE))  # Sample median
 
 
+# Debugging JAGS code
 rm(list=ls()) # Clear Environment
 
 # Arbitrary 'observed' values for analysis
@@ -399,6 +415,7 @@ print(jagsfit, digits=3)
 plot(jagsfit)
 
 
+# Judging convergence
 par(mfrow=c(3,1)) # Multi-frame plot, 3 rows, 1 col
 matplot(jagsfit$BUGSoutput$sims.array[,,1], type = "l", ylab="Marked fraction")
 matplot(jagsfit$BUGSoutput$sims.array[,,2], type = "l", ylab="N hat")
@@ -408,6 +425,7 @@ jagsfit.mcmc <- as.mcmc(jagsfit) # Creates an MCMC object for plotting
 plot(jagsfit.mcmc) # Trace and density plots
 
 
+# What is a likelihood?
 rm(list=ls()) # Clear Environment
 
 # Arbitrary 'observed' values for analysis
@@ -435,6 +453,7 @@ new.l.vec <- choose(n2,new.m2) * p^new.m2 * (1-p)^(n2-new.m2)
 points(p, new.l.vec, col="blue")
 
 
+# Deviance as a measure of model fit 
 rm(list=ls()) # Clear Environment
 
 # Arbitrary 'observed' values for analysis
@@ -455,6 +474,7 @@ dev.vec <- -2 * log_l.vec # Deviance (-2 * ln_L)
 plot(p, dev.vec, ylab="Deviance", col="red")
 
 
+# Model checking
 # Fit model to catch data from Poisson distribution
 
 rm(list=ls()) # Clear Environment
@@ -504,7 +524,7 @@ plot(jagsfit)
 
 
 # Fit model to catch data from Poisson distribution
-# Includes code for posterior predictive check
+# Code includes posterior predictive check
 
 rm(list=ls()) # Clear Environment
 
@@ -558,6 +578,7 @@ jagsfit <- jags(data=jags.data, jags.params, inits=jags.inits,
 print(jagsfit)
 plot(jagsfit)
 
+# Replace Poisson simulation code with the following:
 
 # Fit model to negative binomial data
 # Code includes posterior predictive check
@@ -572,6 +593,7 @@ Catch <- rnbinom(n=N, mu=mu, size=k) # Catches drawn from negative binomial
 Freq <- table(Catch)  # Distribution of simulated counts
 barplot(Freq, main="", xlab="Count", ylab="Frequency")
 
+# Graphical comparision of Poisson and negative binomial
 x.p <- rpois(n=1000, lambda=7)
 k <- 1 # Overdispersion parameter
 x.np <- rnbinom(n=1000, size=k, mu=7)
@@ -581,6 +603,7 @@ hist(x.p, main="", xlim=x.bound, xlab="Poisson")
 hist(x.np, main="", xlim=x.bound, xlab="Negative binomial")
 
 
+# Model selection
 # DIC comparison for model selection, using "observed" data
 # from a negative binomial distribution
 
@@ -672,6 +695,7 @@ NB.DIC <- jagsfit$BUGSoutput$DIC
 Poisson.DIC - NB.DIC
 
 
+# Exercise 3
 rm(list=ls()) # Clear Environment
 
 # Load necessary library packages
