@@ -2973,3 +2973,435 @@ plot(seq(1:A), jagsfit$BUGSoutput$median$SelS.est,
      ylab="Survey selectivity", xlab="Age", type="b", pch=19, 
      ylim=c(0,1))
 points(SelS, lty=3, type="b")
+
+
+# Appendix
+# Removal
+rm(list=ls()) # Clear Environment
+
+# Removal study - whitefish (Ricker 1958)
+Catch <- c(25, 26, 15, 13, 12, 13, 5)
+N.removals <- length(Catch) # Number of removals
+
+# Load necessary library packages
+library(rjags)   # Package for fitting JAGS models from within R
+library(R2jags)  # Package for fitting JAGS models. Requires rjags
+
+# JAGS code for fitting model
+sink("RemovalModel.txt")
+cat("
+model{
+
+# Priors
+ CapProb.est ~ dunif(0,1)
+ N.est ~ dunif(TotalCatch, 2000)
+
+ N.remaining[1] <- trunc(N.est)
+ for(j in 1:N.removals){
+      Catch[j]~dbin(CapProb.est, N.remaining[j]) # jth removal
+      N.remaining[j+1] <- N.remaining[j]-Catch[j]
+  } #j
+
+}
+      ",fill=TRUE)
+sink()
+
+# Bundle data
+TotalCatch <- sum(Catch[])
+jags.data <- list("Catch", "N.removals", "TotalCatch")
+
+
+# Initial values
+jags.inits <- function(){ list(CapProb.est=runif(1, min=0, max=1),
+                               N.est=runif(n=1, min=TotalCatch,
+                                           max=2000))}
+
+model.file <- 'RemovalModel.txt'
+
+# Parameters monitored
+jags.params <- c("N.est", "CapProb.est")
+
+# Call JAGS from R
+jagsfit <- jags(data=jags.data, jags.params, inits=jags.inits,
+                n.chains = 3, n.thin = 1, n.iter = 40000,
+                model.file)
+print(jagsfit)
+plot(jagsfit)
+
+# Mark-recapture
+rm(list=ls()) # Clear Environment
+
+# Ogle (2016)
+# Wisconsin Department of Natural Resources
+# Mark-recapture walleye > 304 mm
+n1 <- 2555 # First sample (Marked)
+n2 <- 274 # Second sample
+m2 <- 92 # Marked fish in second sample
+
+# Load necessary library packages
+library(rjags)   # Package for fitting JAGS models from within R
+library(R2jags)  # Package for fitting JAGS models. Requires rjags
+
+# JAGS code
+sink("TwoSampleCR.txt")
+cat("
+    model {
+
+    # Priors
+    MarkedFraction ~ dunif(0, 1)
+
+    # Calculated value
+    N.hat <- n1 /MarkedFraction
+
+    # Likelihood
+    # Binomial distribution for observed recaptures
+    m2 ~ dbin(MarkedFraction, n2)
+    }
+
+    ",fill = TRUE)
+sink()
+
+# Bundle data
+jags.data <- list("n1", "n2", "m2")
+
+# Initial values.
+jags.inits <- function(){ list(MarkedFraction=runif(1, min=0, max=1))}
+
+model.file <- 'TwoSampleCR.txt'
+
+# Parameters monitored
+jags.params <- c("N.hat", "MarkedFraction")
+
+# Call JAGS from R
+jagsfit <- jags(data=jags.data, inits=jags.inits, jags.params,
+                n.chains = 3, n.thin = 1, n.iter = 2000,
+                n.burnin = 1000, model.file)
+print(jagsfit, digits=3)
+plot(jagsfit)
+
+
+# Survival: Age-composition
+rm(list=ls()) # Clear Environment
+
+# Estimating survival using fishery catch data
+# Pacific halibut, ages 10-20 (1960 year class)
+# Quinn and Deriso 1999
+
+Catch <- c(179187, 122785, 89241, 58111, 26682, 23339,
+           14668, 10050, 5866, 3121, 4837)
+lnC <- log(Catch) # ln-transform to fit traditional catch curve
+Age <- 10:20 # True ages for plotting
+MaxCode <- length(Catch)
+CodedAge <- 1:MaxCode # Coded ages for fitting model
+
+#-----------------------------------------------
+# Fit ln-scale model
+# Load necessary library packages
+library(rjags)
+library(R2jags)
+
+# JAGS code
+sink("CatchCurve.txt")
+cat("
+model{
+    # Priors
+    Z.est ~ dunif(0, 2) # Instantaneous total mortality rate
+    lnC.intercept ~ dunif(0, 20)
+    Var.est ~ dunif(0, 20)
+    tau <- 1/Var.est # Precision
+    sd.est <- sqrt(Var.est)
+    S.est <- exp(-Z.est)
+
+    # Likelihood
+    for (a in 1:MaxCode){
+      lnC.hat[a] <- lnC.intercept - (Z.est*a)
+      lnC[a] ~ dnorm(lnC.hat[a], tau)
+    } # a
+}
+    ",fill=TRUE)
+sink()
+
+# Bundle data
+jags.data <- list("lnC", "MaxCode")
+
+# Initial values
+jags.inits <- function(){ list(Z.est=runif(n=1, min=0, max=2),
+                               lnC.intercept=runif(n=1, min=0, max=20),
+                               Var.est=runif(n=1, min=0, max=20))}
+
+model.file <- 'CatchCurve.txt'
+
+# Parameters monitored
+jags.params <- c("S.est", "Z.est", "lnC.intercept", 
+                 "sd.est", "lnC.hat")
+
+# Call JAGS from R
+jagsfit <- jags(data=jags.data, jags.params, inits=jags.inits,
+                n.chains = 3, n.thin=1, n.iter = 4000, n.burnin=2000,
+                model.file)
+print(jagsfit)
+plot(jagsfit)
+
+y.bounds <- range(lnC, jagsfit$BUGSout$median$lnC.hat)
+plot(Age, lnC, ylim=y.bounds, xlab="Age", ylab="ln-Catch")
+points(Age, jagsfit$BUGSout$median$lnC.hat, type="l", col="red")
+
+
+Survival: Tag-based
+rm(list=ls()) # Clear Environment
+
+# Recovered bands of adult male wood ducks
+# Brownie et al. (1985)
+
+RelYears <- 3 # 1964-1966 # Release years
+RecYears <- 5 # 1964-1968 # Recovery years
+R <- c(1603, 1595, 1157) # Releases by year
+Recoveries <- c(127, 44, 37, 40, 17, NA, NA, 62, 76,
+                44, 28, NA, NA, NA, 82, 61, 24, NA)
+# Convert vector of band recoveries into upper diagonal
+# matrix, NA added for final column for bands not seen again
+Rec.Mat <- matrix(Recoveries,nrow = RelYears,ncol = (RecYears+1),
+                  byrow=TRUE)
+# Placeholder NA - replace by number of bands not seen again
+for (y in 1:RelYears){
+  Rec.Mat[y,RecYears+1] <- R[y]-sum(Rec.Mat[y,y:RecYears])
+} #y
+                  
+# Load necessary library packages
+library(rjags)
+library(R2jags)
+
+# Specify model in JAGS
+sink("TagReturn.txt")
+cat("
+model {
+  # Priors
+  S.est ~ dunif(0,1) # Time-independent survival rate
+  r.est ~ dunif(0,1) # Time-independent tag-recovery rate
+
+  # Calculated value
+  A.est <- 1-S.est # Rate of mortality
+
+# Cell probabilities
+for (i in 1:RelYears) {
+   p.est[i,i] <- r.est
+   for (j in (i+1):RecYears) {
+      p.est[i,j] <- p.est[i,(j-1)] * S.est
+      } #j
+    p.est[i,RecYears+1] <- 1 - sum(p.est[i, i:RecYears])
+    # Last column is prob of not being seen again
+    } #i
+
+# Likelihood
+  for (i in 1:RelYears) {
+    Rec.Mat[i,i:(RecYears+1)] ~ dmulti(p.est[i,i:(RecYears+1)], R[i])
+    }#i
+ } # model
+
+",fill=TRUE)
+sink()
+
+# Bundle data
+jags.data <- list("Rec.Mat", "RelYears", "RecYears", "R")
+
+S.init <- runif(1,min=0,max=1)
+r.init <- 1-S.init  # Initialize r relative to S
+
+# Initial values
+jags.inits <- function(){list(S.est = S.init, r.est=r.init)}
+
+model.file <- 'TagReturn.txt'
+
+# Parameters monitored
+jags.params <- c("S.est", "r.est")
+
+# Call JAGS from R
+jagsfit <- jags(data=jags.data, jags.params, inits=jags.inits,
+                n.chains = 3, n.thin=1, n.iter = 4000, n.burnin=2000,
+                model.file)
+print(jagsfit)
+plot(jagsfit)
+
+
+# Growth: age:length
+# Fitting von Bertalanffy curve
+# Rougheye rockfish
+# Nelson, B., and T. J. Quinn II. 1987. Population parameters for
+# rougheye rockfish (Sebastes aleutianus). Proc. Int. Rockfish
+# Symp., Alaska Sea Grant Rep. 87-2:209-228.
+rm(list=ls()) # Clear Environment
+
+AgeClass <- c(2:38, 40:47, 49, 50, 52:68, 70, 72,75, 77, 80, 82, 85, 95)
+ave.Len <- c(18, 14.5, 17.9, 20.6, 21.9, 23.4, 25.2, 27.2, 29.6, 30.7,
+             32.4, 33, 32.8, 35, 36.3, 37.2, 36.2, 38.8, 37.7, 40.6,
+             40.9, 38.9, 40, 41.9, 42.7, 42.6, 45.5, 40.9, 44.6,
+             46.6, 44.9, 47.2, 48.3, 45.4, 48.8, 46.5, 46.5, 47.9,
+             49.3, 48, 49, 50, 51.3, 52, 48.9, 48.7, 48.6, 51.5, 52,
+             50, 52.7, 59, 52, 50, 50, 51, 50, 52, 50, 59, 55, 52.5, 50,
+             54, 59.5, 51, 51, 60, 74, 49, 57, 60.5)
+sd.Len <- c(NA, 4.9, 2.2, 2.1, 2.1, 2.3, 2.5, 2, 3, 2.9, 3.7, 2.3,
+            2.9, 4.1, 2.4, 5.1, 4.4, 1.8, 5.4, 3.1, 4.3, 4.6, 2.4,
+            3.9, 5.5, 6.4, 4, 4.6, 4.4, 3.6, 6.3, 4.6, 5.1, 4.5,
+            3.4, 4, 2.5, 4.9, 2.5, 2.1, 2.0, 2.2, 5.9, NA, 2.7,
+            2.5, 2.8, 0.7, 11.4, NA, 8, NA, 3.9, NA, NA, 1.4, NA,
+            1, NA, 9.9, 1.4, 2.1, 0, 1, 13.4, 1.4, NA, 12.7, NA,
+            NA, NA, 16.3)
+n.AgeClass <- c(1,6,19,31,27,20,11,19,12,13,12,4,8,11,7,12,10,5,9,7,14,
+                14,13,15,15,9,8,8,13,11,9,9,16,13,10,14,4,8,3,7,3,7,10,
+                1,9,3,7,2,4,1,3,1,5,1,1,4,1,3,1,2,2,2,2,1,2,2,1,2,1,1,
+                1,2)
+N.AgeLen <- sum(n.AgeClass[])
+Len <- array(data=NA, dim=N.AgeLen)
+Age <- array(data=NA, dim=N.AgeLen)
+fish <- 1 # Counter for individual fish
+for (a in 1:length(AgeClass)){
+  if (n.AgeClass[a]==1) {
+    Age[fish] <- AgeClass[a]
+    Len[fish] <- ave.Len[a]
+    fish <- fish+1
+  } else
+    for (j in 1:n.AgeClass[a]){
+      Age[fish] <- AgeClass[a]
+      Len[fish] <- rnorm(n=1, mean=ave.Len[a], sd=sd.Len[a])
+      fish <- fish+1
+    } #j
+} #a
+
+# Load necessary library packages
+library(rjags)
+library(R2jags)
+
+# JAGS code
+sink("GrowthCurve.txt")
+cat("
+model{
+
+# Priors
+
+ L_inf.est ~ dunif(0, 200)
+ k.est ~ dunif(0, 2)
+ t0.est ~ dunif(-5, 5)
+ Var_L.est ~ dunif(0,100)   # Variability in length at age
+
+# Calculated value
+ tau.est <- 1/Var_L.est
+
+# Likelihood
+ for (i in 1:N.AgeLen) {
+    Len_hat[i] <- L_inf.est*(1-exp(-k.est*(Age[i]-t0.est)))
+    Len[i] ~ dnorm(Len_hat[i], tau.est)
+ } #i
+}
+    ",fill=TRUE)
+sink()
+
+# Bundle data
+jags.data <- list("N.AgeLen", "Age", "Len")
+
+# Initial values
+jags.inits <- function(){list(L_inf.est=runif(n=1, min=0, max=max(Len)),
+                              k.est=runif(n=1, min=0, max=2),
+                              t0.est=runif(n=1, min=-5, max=5),
+                              Var_L.est=runif(n=1, min=0, max=100))}
+
+model.file <- 'GrowthCurve.txt'
+
+# Parameters monitored
+jags.params <- c("L_inf.est", "k.est", "t0.est", "Var_L.est")
+
+# Call JAGS from R
+jagsfit <- jags(data=jags.data, jags.params, inits=jags.inits,
+                n.chains = 3, n.thin=1, n.iter = 10000,
+                model.file)
+print(jagsfit)
+plot(jagsfit)
+
+Len_hat <- array(data=NA, dim=N.AgeLen)
+for (a in 1:N.AgeLen){
+  Len_hat[a] <- jagsfit$BUGSoutput$median$L_inf.est*(1-
+                    exp(-jagsfit$BUGSout$median$k.est
+                    *(Age[a]-jagsfit$BUGSout$median$t0.est)))
+  } #a
+plot(Age, Len, xlab="Age", ylab="Length (cm)")
+points(Age, Len_hat, type="l", col="red")
+
+
+# Recruitment: Beverton-Holt curve
+# Fitting Beverton-Holt stock-recruitment curve
+# North Sea plaice. Ricker 1975, Table 11.8
+# Units arbitrary
+
+# Adult stock biomass (P)
+P <- c(9, 9, 9, 10, 10, 10, 10, 10, 11, 11, 12, 12, 18, 18, 19, 20,
+       21, 21, 26, 32, 35, 45, 54, 70, 82, 88)
+R <- c(13, 20, 45, 13, 13, 20, 21, 26, 11, 12, 8, 15, 7, 10, 17,
+       16, 11, 15, 16, 33, 10, 23, 13, 13, 12, 24)
+
+# Load necessary library packages
+library(rjags)
+library(R2jags)
+
+sink("StockRecruit.txt")
+cat("
+model {
+# Model parameters: Beverton-Holt alpha and beta, 
+# ln-scale variance for fitted curve
+
+# Priors
+ BH_alpha.est ~ dunif(0, 10)
+ BH_beta.est ~ dunif(0, 10)
+ V_rec.est ~ dunif(0, 10)
+ tau <- 1/V_rec.est
+
+# Likelihood
+    for(y in 1:Y) {
+      lnR_hat[y] <- log(1/(BH_alpha.est+BH_beta.est/P[y]))
+      R[y] ~ dlnorm(lnR_hat[y],tau)
+      R_hat[y] <- exp(lnR_hat[y])
+      } #y
+}
+    ",fill=TRUE)
+sink()
+
+# Bundle data
+Y <- length(P)
+jags.data <- list("Y", "P", "R")
+
+# Initial values
+y <- R[1:Y]
+x <- P[1:Y]
+nls_init <- nls(y ~ 1/(BH_a_start+BH_b_start/x),
+                start = list(BH_a_start = 0.001, BH_b_start = 0.001),
+                algorithm="port", 
+                lower=c(1E-6, 0), upper=c(1000,1000))
+#summary(nls_init)
+nls_save <- coef(nls_init)
+#y_hat <- 1/(nls_save[1]+nls_save[2]/x)
+#plot(x,y)
+#points(x,y_hat, col="red", type="l")
+
+jags.inits <- function(){ list(BH_alpha.est=nls_save[1],
+                               BH_beta.est=nls_save[2],
+                               V_rec.est=runif(n=1, min=0, max=10))}
+
+model.file <- 'StockRecruit.txt'
+
+# Parameters monitored
+jags.params <- c("BH_alpha.est", "BH_beta.est", "V_rec.est",
+                 "R_hat")
+
+# Call JAGS from R
+jagsfit <- jags(data=jags.data, jags.params, inits=jags.inits,
+                n.chains = 3, n.thin=1, n.iter = 10000,
+                model.file)
+print(jagsfit)
+plot(jagsfit)
+
+df.xy <- data.frame(P[1:Y], R[1:Y],
+                    jagsfit$BUGSoutput$median$R_hat)
+df.xy <- df.xy[order(df.xy[,1]),]  # Sort by survey index for plotting
+y.bounds <- range(R[1:Y],jagsfit$BUGSoutput$median$R_hat)
+
+plot(df.xy[,1],df.xy[,2], ylab="Recruitment index",
+     xlab="Spawning Stock Index", ylim=y.bounds) #c(min.y, max.y))
+points(df.xy[,1], df.xy[,3], type="l")
